@@ -13,4 +13,5 @@ at::Tensor ROIAlign_forward_cpu(const at::Tensor& input,
 
 at::Tensor nms_cpu(const at::Tensor& dets,
                    const at::Tensor& scores,
-                   const float threshold);
+                   const float threshold,
+                   const bool iou_flag);

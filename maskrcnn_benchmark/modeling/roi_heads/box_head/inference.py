@@ -22,6 +22,10 @@ class PostProcessor(nn.Module):
         nms=0.5,
         detections_per_img=100,
         box_coder=None,
+		use_nms_inter_class=False, 
+		nms_inter_class=1.0, 
+		use_nms_area=False, 
+		nms_area=1.0,
         cls_agnostic_bbox_reg=False,
         bbox_aug_enabled=False
     ):
@@ -41,6 +45,10 @@ class PostProcessor(nn.Module):
         self.box_coder = box_coder
         self.cls_agnostic_bbox_reg = cls_agnostic_bbox_reg
         self.bbox_aug_enabled = bbox_aug_enabled
+        self.use_nms_inter_class = use_nms_inter_class
+        self.nms_inter_class = nms_inter_class
+        self.use_nms_area = use_nms_area
+        self.nms_area = nms_area
 
     def forward(self, x, boxes):
         """
@@ -122,12 +130,19 @@ class PostProcessor(nn.Module):
         for j in range(1, num_classes):
             inds = inds_all[:, j].nonzero().squeeze(1)
             scores_j = scores[inds, j]
+            scores_all = scores[inds, :]
             boxes_j = boxes[inds, j * 4 : (j + 1) * 4]
             boxlist_for_class = BoxList(boxes_j, boxlist.size, mode="xyxy")
             boxlist_for_class.add_field("scores", scores_j)
+            boxlist_for_class.add_field("scores_all", scores_all)
             boxlist_for_class = boxlist_nms(
-                boxlist_for_class, self.nms
+                boxlist_for_class, self.nms, score_filed="scores", iou_flag=True
             )
+            if self.use_nms_area:
+               boxlist_for_class.add_field("area", boxlist_for_class.area())
+               boxlist_for_class = boxlist_nms(
+                   boxlist_for_class, self.nms_area, score_field="area", iou_flag=False
+               )
             num_labels = len(boxlist_for_class)
             boxlist_for_class.add_field(
                 "labels", torch.full((num_labels,), j, dtype=torch.int64, device=device)
@@ -135,6 +150,10 @@ class PostProcessor(nn.Module):
             result.append(boxlist_for_class)
 
         result = cat_boxlist(result)
+        if self.use_nms_inter_class:
+            result = boxlist_nms(
+                result, self.nms_inter_class, score_field="scores"
+            )
         number_of_detections = len(result)
 
         # Limit to max_per_image detections **over all classes**
@@ -160,12 +179,20 @@ def make_roi_box_post_processor(cfg):
     detections_per_img = cfg.MODEL.ROI_HEADS.DETECTIONS_PER_IMG
     cls_agnostic_bbox_reg = cfg.MODEL.CLS_AGNOSTIC_BBOX_REG
     bbox_aug_enabled = cfg.TEST.BBOX_AUG.ENABLED
+    use_nms_inter_class = cfg.MODEL.ROI_HEADS.USE_NMS_INTER_CLASS
+    nms_inter_class = cfg.MODEL.ROI_HEADS.NMS_INTER_CLASS
+    use_nms_area = cfg.MODEL.ROI_HEADS.USE_NMS_AREA
+    nms_area = cfg.MODEL.ROI_HEADS.NMS_AREA
 
     postprocessor = PostProcessor(
         score_thresh,
         nms_thresh,
         detections_per_img,
         box_coder,
+        use_nms_inter_class, 
+		nms_inter_class, 
+		use_nms_area, 
+		nms_area,		
         cls_agnostic_bbox_reg,
         bbox_aug_enabled
     )

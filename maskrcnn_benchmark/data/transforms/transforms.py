@@ -1,8 +1,13 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import random
 
+import numpy as np
+from PIL import Image
+
+import imgaug as ia
 import torch
 import torchvision
+from imgaug import augmenters as iaa
 from torchvision.transforms import functional as F
 
 
@@ -83,28 +88,9 @@ class RandomVerticalFlip(object):
             target = target.transpose(1)
         return image, target
 
-class ColorJitter(object):
-    def __init__(self,
-                 brightness=None,
-                 contrast=None,
-                 saturation=None,
-                 hue=None,
-                 ):
-        self.color_jitter = torchvision.transforms.ColorJitter(
-            brightness=brightness,
-            contrast=contrast,
-            saturation=saturation,
-            hue=hue,)
-
-    def __call__(self, image, target):
-        image = self.color_jitter(image)
-        return image, target
-
-
 class ToTensor(object):
     def __call__(self, image, target):
         return F.to_tensor(image), target
-
 
 class Normalize(object):
     def __init__(self, mean, std, to_bgr255=True):
@@ -117,5 +103,68 @@ class Normalize(object):
             image = image[[2, 1, 0]] * 255
         image = F.normalize(image, mean=self.mean, std=self.std)
         if target is None:
-            return image
+		   return image
+		return image, target
+
+class Blur(object):
+    def __init__(self, prob=0.5):
+        self.prob = prob
+
+    def __call__(self, image, target):
+        if random.random() < self.prob:
+           aug_seq = iaa.OneOf([
+                 iaa.GaussianBlur(sigma=(0.0, 1.0)),
+                 iaa.Sharpen(alpha=(0.0, 1.0), lightness=(0.75, 2.0)),
+                 iaa.Add((-40, 40), per_channel=0.5),
+                 iaa.JpegCompression(compression=(5, 25))
+           ])
+           image = aug_seq.augment_image(np.array(image))
+           image = Image.fromarray(np.uint8(image))
+        return image, target
+
+class ContrastNormalization(object):
+    def __init__(self, prob=0.5):
+        self.prob = prob
+
+    def __call__(self, image, target):
+        if random.random() < self.prob:
+           aug_seq = iaa.ContrastNormalization((0.5, 1.5))
+           image = aug_seq.augment_image(np.array(image))
+           image = Image.fromarray(np.uint8(image))
+        return image, target
+
+class RandomCrop(object):
+    def __init__(self, prob=0.5):
+        self.prob = prob
+
+    def __call__(self, image, target):
+        if random.random() < self.prob:
+           w, h = image.size
+           bbox = [random.randint(0, int(w*0.1)), random.randint(0, int(h*0.1)), random.randint(int(w*0.9), w), random.randint(int(h*0.9), h)]
+           image = image.crop(bbox)
+           target = target.crop(bbox)
+        return image, target
+
+class ChangeHSV(object):
+    def __init__(self, prob=0.5):
+        self.prob = prob
+
+    def __call__(self, image, target):
+        if random.random() < self.prob:
+           aug_seq = iaa.OneOf([
+                     iaa.WithColorspace(to_colorspace="HSV", from_colorspace="RGB", children=iaa.WithChannels(0, iaa.Add((10, 50)))),
+                     iaa.Grayscale(alpha=(0.0, 1.0))
+           ])
+           image = aug_seq.augment_image(np.array(image))
+           image = Image.fromarray(np.uint8(image))
+        return image, target
+
+class RandomRotate90(object):
+    def __init__(self, prob=0.5):
+        self.prob = prob
+
+    def __call__(self, image, target):
+        if random.random() < self.prob:            
+            image = F.rotate(image, 90, expand=True)        
+            target = target.transpose(2)
         return image, target

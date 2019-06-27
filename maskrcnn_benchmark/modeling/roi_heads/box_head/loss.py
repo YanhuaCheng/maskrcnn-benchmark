@@ -23,6 +23,8 @@ class FastRCNNLossComputation(object):
         proposal_matcher,
         fg_bg_sampler,
         box_coder,
+		class_weights,
+		class_compete,
         cls_agnostic_bbox_reg=False
     ):
         """
@@ -35,6 +37,8 @@ class FastRCNNLossComputation(object):
         self.fg_bg_sampler = fg_bg_sampler
         self.box_coder = box_coder
         self.cls_agnostic_bbox_reg = cls_agnostic_bbox_reg
+		self.class_weights = class_weights
+        self.class_compete = class_compete
 
     def match_targets_to_proposals(self, proposal, target):
         match_quality_matrix = boxlist_iou(target, proposal)
@@ -142,8 +146,12 @@ class FastRCNNLossComputation(object):
         regression_targets = cat(
             [proposal.get_field("regression_targets") for proposal in proposals], dim=0
         )
-
-        classification_loss = F.cross_entropy(class_logits, labels)
+        if self.class_compete:
+           classification_loss = F.cross_entropy(class_logits, labels, weight=torch.tensor(self.class_weights, device=device))
+        else:
+           onehot_labels = torch.zeros_like(class_logits)
+           onehot_labels.scatter_(1, torch.unsqueeze(labels, 1), 1.0)
+           classification_loss = F.binary_cross_entropy_with_logits(class_logits, onehot_labels, pos_weight=torch.tensor(self.class_weights, device=device))
 
         # get indices that correspond to the regression targets for
         # the corresponding ground truth labels, to be used with
@@ -176,6 +184,10 @@ def make_roi_box_loss_evaluator(cfg):
 
     bbox_reg_weights = cfg.MODEL.ROI_HEADS.BBOX_REG_WEIGHTS
     box_coder = BoxCoder(weights=bbox_reg_weights)
+    class_weights = cfg.MODEL.ROI_BOX_HEAD.CLASS_WEIGHT
+    class_compete = cfg.MODEL.ROI_BOX_HEAD.CLASS_COMPETE
+    if len(class_weights) == 1:
+       class_weights = class_weights * cfg.MODEL.ROI_BOX_HEAD.NUM_CLASS
 
     fg_bg_sampler = BalancedPositiveNegativeSampler(
         cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE, cfg.MODEL.ROI_HEADS.POSITIVE_FRACTION
@@ -187,6 +199,8 @@ def make_roi_box_loss_evaluator(cfg):
         matcher,
         fg_bg_sampler,
         box_coder,
+		class_weights,
+		class_compete,
         cls_agnostic_bbox_reg
     )
 

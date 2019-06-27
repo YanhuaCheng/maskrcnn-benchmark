@@ -4,6 +4,7 @@ import torch
 # transpose
 FLIP_LEFT_RIGHT = 0
 FLIP_TOP_BOTTOM = 1
+FLIP_90 = 2
 
 
 class BoxList(object):
@@ -134,9 +135,9 @@ class BoxList(object):
           :py:attr:`PIL.Image.ROTATE_180`, :py:attr:`PIL.Image.ROTATE_270`,
           :py:attr:`PIL.Image.TRANSPOSE` or :py:attr:`PIL.Image.TRANSVERSE`.
         """
-        if method not in (FLIP_LEFT_RIGHT, FLIP_TOP_BOTTOM):
+        if method not in (FLIP_LEFT_RIGHT, FLIP_TOP_BOTTOM, FLIP_90):
             raise NotImplementedError(
-                "Only FLIP_LEFT_RIGHT and FLIP_TOP_BOTTOM implemented"
+                "Only FLIP_LEFT_RIGHT, FLIP_TOP_BOTTOM, FLIP_90 implemented"
             )
 
         image_width, image_height = self.size
@@ -147,16 +148,26 @@ class BoxList(object):
             transposed_xmax = image_width - xmin - TO_REMOVE
             transposed_ymin = ymin
             transposed_ymax = ymax
+            size = (image_width, image_height)
         elif method == FLIP_TOP_BOTTOM:
+            TO_REMOVE = 1
             transposed_xmin = xmin
             transposed_xmax = xmax
-            transposed_ymin = image_height - ymax
-            transposed_ymax = image_height - ymin
+            transposed_ymin = image_height - ymax - TO_REMOVE
+            transposed_ymax = image_height - ymin - TO_REMOVE
+            size = (image_width, image_height)
+        elif method == FLIP_90:
+            TO_REMOVE = 1
+            transposed_xmin = image_height - ymax - TO_REMOVE
+            transposed_xmax = image_height - ymin - TO_REMOVE
+            transposed_ymin = xmin
+            transposed_ymax = xmax
+            size = (image_height, image_width)
 
         transposed_boxes = torch.cat(
             (transposed_xmin, transposed_ymin, transposed_xmax, transposed_ymax), dim=-1
         )
-        bbox = BoxList(transposed_boxes, self.size, mode="xyxy")
+        bbox = BoxList(transposed_boxes, size, mode="xyxy")
         # bbox._copy_extra_fields(self)
         for k, v in self.extra_fields.items():
             if not isinstance(v, torch.Tensor):

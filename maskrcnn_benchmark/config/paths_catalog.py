@@ -7,103 +7,198 @@ import os
 class DatasetCatalog(object):
     DATA_DIR = "datasets"
     DATASETS = {
-        "coco_2017_train": {
-            "img_dir": "coco/train2017",
-            "ann_file": "coco/annotations/instances_train2017.json"
-        },
-        "coco_2017_val": {
-            "img_dir": "coco/val2017",
-            "ann_file": "coco/annotations/instances_val2017.json"
-        },
-        "coco_2014_train": {
-            "img_dir": "coco/train2014",
-            "ann_file": "coco/annotations/instances_train2014.json"
-        },
-        "coco_2014_val": {
-            "img_dir": "coco/val2014",
-            "ann_file": "coco/annotations/instances_val2014.json"
-        },
-        "coco_2014_minival": {
-            "img_dir": "coco/val2014",
-            "ann_file": "coco/annotations/instances_minival2014.json"
-        },
-        "coco_2014_valminusminival": {
-            "img_dir": "coco/val2014",
-            "ann_file": "coco/annotations/instances_valminusminival2014.json"
-        },
-        "keypoints_coco_2014_train": {
-            "img_dir": "coco/train2014",
-            "ann_file": "coco/annotations/person_keypoints_train2014.json",
-        },
-        "keypoints_coco_2014_val": {
-            "img_dir": "coco/val2014",
-            "ann_file": "coco/annotations/person_keypoints_val2014.json"
-        },
-        "keypoints_coco_2014_minival": {
-            "img_dir": "coco/val2014",
-            "ann_file": "coco/annotations/person_keypoints_minival2014.json",
-        },
-        "keypoints_coco_2014_valminusminival": {
-            "img_dir": "coco/val2014",
-            "ann_file": "coco/annotations/person_keypoints_valminusminival2014.json",
-        },
-        "voc_2007_train": {
-            "data_dir": "voc/VOC2007",
-            "split": "train"
-        },
-        "voc_2007_train_cocostyle": {
-            "img_dir": "voc/VOC2007/JPEGImages",
-            "ann_file": "voc/VOC2007/Annotations/pascal_train2007.json"
-        },
-        "voc_2007_val": {
-            "data_dir": "voc/VOC2007",
-            "split": "val"
-        },
-        "voc_2007_val_cocostyle": {
-            "img_dir": "voc/VOC2007/JPEGImages",
-            "ann_file": "voc/VOC2007/Annotations/pascal_val2007.json"
-        },
-        "voc_2007_test": {
-            "data_dir": "voc/VOC2007",
-            "split": "test"
-        },
-        "voc_2007_test_cocostyle": {
-            "img_dir": "voc/VOC2007/JPEGImages",
-            "ann_file": "voc/VOC2007/Annotations/pascal_test2007.json"
-        },
-        "voc_2012_train": {
-            "data_dir": "voc/VOC2012",
-            "split": "train"
-        },
-        "voc_2012_train_cocostyle": {
-            "img_dir": "voc/VOC2012/JPEGImages",
-            "ann_file": "voc/VOC2012/Annotations/pascal_train2012.json"
-        },
-        "voc_2012_val": {
-            "data_dir": "voc/VOC2012",
-            "split": "val"
-        },
-        "voc_2012_val_cocostyle": {
-            "img_dir": "voc/VOC2012/JPEGImages",
-            "ann_file": "voc/VOC2012/Annotations/pascal_val2012.json"
-        },
-        "voc_2012_test": {
-            "data_dir": "voc/VOC2012",
-            "split": "test"
-            # PASCAL VOC2012 doesn't made the test annotations available, so there's no json annotation
-        },
-        "cityscapes_fine_instanceonly_seg_train_cocostyle": {
-            "img_dir": "cityscapes/images",
-            "ann_file": "cityscapes/annotations/instancesonly_filtered_gtFine_train.json"
-        },
-        "cityscapes_fine_instanceonly_seg_val_cocostyle": {
-            "img_dir": "cityscapes/images",
-            "ann_file": "cityscapes/annotations/instancesonly_filtered_gtFine_val.json"
-        },
-        "cityscapes_fine_instanceonly_seg_test_cocostyle": {
-            "img_dir": "cityscapes/images",
-            "ann_file": "cityscapes/annotations/instancesonly_filtered_gtFine_test.json"
-        }
+      "coco_shoujike_annotated": {
+        "img_dir": "full_product/shoujike_annotated",
+        "ann_file": "full_product/annotations/shoujike_annotated.json"
+      },
+      "coco_ali_clothing": {
+        "img_dir": "full_product/ali_clothing",
+        "ann_file": "full_product/annotations/ali_clothing.json"
+      },
+      "coco_bag": {
+        "img_dir": "full_product/bag",
+        "ann_file": "full_product/annotations/bag.json"
+      },
+      "coco_bag_purse_8000": {
+        "img_dir": "full_product/bag_purse_8000",
+        "ann_file": "full_product/annotations/bag_purse_8000.json"
+      },
+      "coco_car": {
+        "img_dir": "full_product/car",
+        "ann_file": "full_product/annotations/car.json"
+      },
+      "coco_cat04": {
+        "img_dir": "full_product/cat04",
+        "ann_file": "full_product/annotations/cat04.json"
+      },
+      "coco_cat05": {
+        "img_dir": "full_product/cat05",
+        "ann_file": "full_product/annotations/cat05.json"
+      },
+      "coco_cat06": {
+        "img_dir": "full_product/cat06",
+        "ann_file": "full_product/annotations/cat06.json"
+      },
+      "coco_cat07": {
+        "img_dir": "full_product/cat07",
+        "ann_file": "full_product/annotations/cat07.json"
+      },
+      "coco_cat08": {
+        "img_dir": "full_product/cat08",
+        "ann_file": "full_product/annotations/cat08.json"
+      },
+      "coco_cat09": {
+        "img_dir": "full_product/cat09",
+        "ann_file": "full_product/annotations/cat09.json"
+      },
+      "coco_cat10": {
+        "img_dir": "full_product/cat10",
+        "ann_file": "full_product/annotations/cat10.json"
+      },
+      "coco_cat11": {
+        "img_dir": "full_product/cat11",
+        "ann_file": "full_product/annotations/cat11.json"
+      },
+      "coco_chuju": {
+        "img_dir": "full_product/chuju",
+        "ann_file": "full_product/annotations/chuju.json"
+      },
+      "coco_clothes_nohuman5k": {
+        "img_dir": "full_product/clothes_nohuman5k",
+        "ann_file": "full_product/annotations/clothes_nohuman5k.json"
+      },
+      "coco_diannaobangong": {
+        "img_dir": "full_product/diannaobangong",
+        "ann_file": "full_product/annotations/diannaobangong.json"
+      },
+      "coco_feicui": {
+        "img_dir": "full_product/feicui",
+        "ann_file": "full_product/annotations/feicui.json"
+      },
+      "coco_hetianyu": {
+        "img_dir": "full_product/hetianyu",
+        "ann_file": "full_product/annotations/hetianyu.json"
+      },
+      "coco_human_parsing": {
+        "img_dir": "full_product/human_parsing",
+        "ann_file": "full_product/annotations/human_parsing.json"
+      },
+      "coco_jiadian1": {
+        "img_dir": "full_product/jiadian1",
+        "ann_file": "full_product/annotations/jiadian1.json"
+      },
+      "coco_jiadian1_extra": {
+        "img_dir": "full_product/jiadian1_extra",
+        "ann_file": "full_product/annotations/jiadian1_extra.json"
+      },
+      "coco_jiadian2": {
+        "img_dir": "full_product/jiadian2",
+        "ann_file": "full_product/annotations/jiadian2.json"
+      },
+      "coco_jiadian2_extra": {
+        "img_dir": "full_product/jiadian2_extra",
+        "ann_file": "full_product/annotations/jiadian2_extra.json"
+      },
+      "coco_jiadian3": {
+        "img_dir": "full_product/jiadian3",
+        "ann_file": "full_product/annotations/jiadian3.json"
+      },
+      "coco_jiaju": {
+        "img_dir": "full_product/jiaju",
+        "ann_file": "full_product/annotations/jiaju.json"
+      },
+      "coco_jiazhuang": {
+        "img_dir": "full_product/jiazhuang",
+        "ann_file": "full_product/annotations/jiazhuang.json"
+      },
+      "coco_jiulei": {
+        "img_dir": "full_product/jiulei",
+        "ann_file": "full_product/annotations/jiulei.json"
+      },
+      "coco_meizhuang_1w": {
+        "img_dir": "full_product/meizhuang_1w",
+        "ann_file": "full_product/annotations/meizhuang_1w.json"
+      },
+      "coco_meizhuang_2w": {
+        "img_dir": "full_product/meizhuang_2w",
+        "ann_file": "full_product/annotations/meizhuang_2w.json"
+      },
+      "coco_muying_jiaju": {
+        "img_dir": "full_product/muying_jiaju",
+        "ann_file": "full_product/annotations/muying_jiaju.json"
+      },
+      "coco_muying_shipin": {
+        "img_dir": "full_product/muying_shipin",
+        "ann_file": "full_product/annotations/muying_shipin.json"
+      },
+      "coco_muying_wanjuyuqi": {
+        "img_dir": "full_product/muying_wanjuyuqi",
+        "ann_file": "full_product/annotations/muying_wanjuyuqi.json"
+      },
+      "coco_neiyiku_4k": {
+        "img_dir": "full_product/neiyiku_4k",
+        "ann_file": "full_product/annotations/neiyiku_4k.json"
+      },
+      "coco_shengxian": {
+        "img_dir": "full_product/shengxian",
+        "ann_file": "full_product/annotations/shengxian.json"
+      },
+      "coco_shipinbuchong": {
+        "img_dir": "full_product/shipinbuchong",
+        "ann_file": "full_product/annotations/shipinbuchong.json"
+      },
+      "coco_shipinyinliao": {
+        "img_dir": "full_product/shipinyinliao",
+        "ann_file": "full_product/annotations/shipinyinliao.json"
+      },
+      "coco_shoes": {
+        "img_dir": "full_product/shoes",
+        "ann_file": "full_product/annotations/shoes.json"
+      },
+      "coco_shouji": {
+        "img_dir": "full_product/shouji",
+        "ann_file": "full_product/annotations/shouji.json"
+      },
+      "coco_shouji_extra": {
+        "img_dir": "full_product/shouji_extra",
+        "ann_file": "full_product/annotations/shouji_extra.json"
+      },
+      "coco_shuma": {
+        "img_dir": "full_product/shuma",
+        "ann_file": "full_product/annotations/shuma.json"
+      },
+      "coco_suitcase_2w": {
+        "img_dir": "full_product/suitcase_2w",
+        "ann_file": "full_product/annotations/suitcase_2w.json"
+      },
+      "coco_tushu": {
+        "img_dir": "full_product/tushu",
+        "ann_file": "full_product/annotations/tushu.json"
+      },
+      "coco_tushu1": {
+        "img_dir": "full_product/tushu1",
+        "ann_file": "full_product/annotations/tushu1.json"
+      },
+      "coco_tushu2": {
+        "img_dir": "full_product/tushu2",
+        "ann_file": "full_product/annotations/tushu2.json"
+      },
+      "coco_tushu3": {
+        "img_dir": "full_product/tushu3",
+        "ann_file": "full_product/annotations/tushu3.json"
+      },
+      "coco_wanjuyueqi": {
+        "img_dir": "full_product/wanjuyueqi",
+        "ann_file": "full_product/annotations/wanjuyueqi.json"
+      },
+      "coco_yiyaobaojian": {
+        "img_dir": "full_product/yiyaobaojian",
+        "ann_file": "full_product/annotations/yiyaobaojian.json"
+      },
+      "coco_zhubaoshoushi": {
+        "img_dir": "full_product/zhubaoshoushi",
+        "ann_file": "full_product/annotations/zhubaoshoushi.json"
+      }
     }
 
     @staticmethod

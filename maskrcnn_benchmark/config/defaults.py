@@ -33,7 +33,8 @@ _C.MODEL.CLS_AGNOSTIC_BBOX_REG = False
 # the path in paths_catalog. Else, it will use it as the specified absolute
 # path
 _C.MODEL.WEIGHT = ""
-
+# Adapt to different number of categories
+_C.MODEL.IGNORE_CLASS_WEIGHT_BIAS = False
 
 # -----------------------------------------------------------------------------
 # INPUT
@@ -54,13 +55,14 @@ _C.INPUT.PIXEL_STD = [1., 1., 1.]
 # Convert image to BGR format (for Caffe2 models), in range 0-255
 _C.INPUT.TO_BGR255 = True
 
-# Image ColorJitter
-_C.INPUT.BRIGHTNESS = 0.0
-_C.INPUT.CONTRAST = 0.0
-_C.INPUT.SATURATION = 0.0
-_C.INPUT.HUE = 0.0
-
-_C.INPUT.VERTICAL_FLIP_PROB_TRAIN = 0.0
+# Data Augmentation
+_C.INPUT.FLIP_PROB_TRAIN = 0.5
+_C.INPUT.VERTICAL_FLIP_PROB_TRAIN = 0.3
+_C.INPUT.FLIP_90_PROB_TRAIN = 0.3
+_C.INPUT.CROP_PROB_TRAIN = 0.3
+_C.INPUT.BLUR_PROB_TRAIN = 0.3
+_C.INPUT.CONTRAST_PROB_TRAIN = 0.3
+_C.INPUT.HSV_PROB_TRAIN = 0.3
 
 # -----------------------------------------------------------------------------
 # Dataset
@@ -198,9 +200,14 @@ _C.MODEL.ROI_HEADS.POSITIVE_FRACTION = 0.25
 # balance obtaining high recall with not having too many low precision
 # detections that will slow down inference post processing steps (like NMS)
 _C.MODEL.ROI_HEADS.SCORE_THRESH = 0.05
+_C.MODEL.ROI_HEADS.SCORE_THRESH_HIGH = 0.05
 # Overlap threshold used for non-maximum suppression (suppress boxes with
 # IoU >= this threshold)
-_C.MODEL.ROI_HEADS.NMS = 0.5
+_C.MODEL.ROI_HEADS.NMS = 0.5 #intra-class
+_C.MODEL.ROI_HEADS.USE_NMS_INTER_CLASS = False #inter-class
+_C.MODEL.ROI_HEADS.NMS_INTER_CLASS = 0.7 #inter-class
+_C.MODEL.ROI_HEADS.USE_NMS_AREA = False
+_C.MODEL.ROI_HEADS.NMS_AREA = 0.8
 # Maximum number of detections to return per image (100 is based on the limit
 # established for the COCO dataset)
 _C.MODEL.ROI_HEADS.DETECTIONS_PER_IMG = 100
@@ -212,7 +219,9 @@ _C.MODEL.ROI_BOX_HEAD.PREDICTOR = "FastRCNNPredictor"
 _C.MODEL.ROI_BOX_HEAD.POOLER_RESOLUTION = 14
 _C.MODEL.ROI_BOX_HEAD.POOLER_SAMPLING_RATIO = 0
 _C.MODEL.ROI_BOX_HEAD.POOLER_SCALES = (1.0 / 16,)
-_C.MODEL.ROI_BOX_HEAD.NUM_CLASSES = 81
+_C.MODEL.ROI_BOX_HEAD.NUM_CLASSES = 5
+_C.MODEL.ROI_BOX_HEAD.CLASS_WEIGHT = (1.0, 1.0, 1.0, 1.0, 1.0) #
+_C.MODEL.ROI_BOX_HEAD.CLASS_COMPETE = True #
 # Hidden layer dimension when using an MLP for the RoI box head
 _C.MODEL.ROI_BOX_HEAD.MLP_HEAD_DIM = 1024
 # GN

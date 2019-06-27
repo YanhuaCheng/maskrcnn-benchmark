@@ -1,4 +1,5 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+from PIL import ImageFile
 import torch
 import torchvision
 
@@ -6,7 +7,7 @@ from maskrcnn_benchmark.structures.bounding_box import BoxList
 from maskrcnn_benchmark.structures.segmentation_mask import SegmentationMask
 from maskrcnn_benchmark.structures.keypoint import PersonKeypoints
 
-
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 min_keypoints_per_image = 10
 
 

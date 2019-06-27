@@ -7,7 +7,7 @@ import torch
 from maskrcnn_benchmark.utils.imports import import_file
 
 
-def align_and_update_state_dicts(model_state_dict, loaded_state_dict):
+def align_and_update_state_dicts(model_state_dict, loaded_state_dict, ignore_class_weight_bias):
     """
     Strategy: suppose that the models that we will create will have prefixes appended
     to each of its keys, for example due to an extra level of nesting that the original
@@ -46,6 +46,10 @@ def align_and_update_state_dicts(model_state_dict, loaded_state_dict):
             continue
         key = current_keys[idx_new]
         key_old = loaded_keys[idx_old]
+        if ignore_class_weight_bias:
+           if key_old.endswith(('roi_heads.box.predictor.cls_score.weight', 'roi_heads.box.predictor.cls_score.bias', 'roi_heads.box.predictor.bbox_pred.weight', 'roi_heads.box.predictor.bbox_pred.bias')):
+              logger.info('Ingore weight of {}'.format(key_old))
+              continue
         model_state_dict[key] = loaded_state_dict[key_old]
         logger.info(
             log_str_template.format(
@@ -68,13 +72,13 @@ def strip_prefix_if_present(state_dict, prefix):
     return stripped_state_dict
 
 
-def load_state_dict(model, loaded_state_dict):
+def load_state_dict(model, loaded_state_dict, ignore_class_weight_bias=False):
     model_state_dict = model.state_dict()
     # if the state_dict comes from a model that was wrapped in a
     # DataParallel or DistributedDataParallel during serialization,
     # remove the "module" prefix before performing the matching
     loaded_state_dict = strip_prefix_if_present(loaded_state_dict, prefix="module.")
-    align_and_update_state_dicts(model_state_dict, loaded_state_dict)
+    align_and_update_state_dicts(model_state_dict, loaded_state_dict, ignore_class_weight_bias)
 
     # use strict loading
     model.load_state_dict(model_state_dict)
