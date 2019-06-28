@@ -103,8 +103,8 @@ class Normalize(object):
             image = image[[2, 1, 0]] * 255
         image = F.normalize(image, mean=self.mean, std=self.std)
         if target is None:
-		   return image
-		return image, target
+            return image
+        return image, target
 
 class Blur(object):
     def __init__(self, prob=0.5):
@@ -164,7 +164,7 @@ class RandomRotate90(object):
         self.prob = prob
 
     def __call__(self, image, target):
-        if random.random() < self.prob:            
-            image = F.rotate(image, 90, expand=True)        
+        if random.random() < self.prob:
+            image = F.rotate(image, -90, expand=True)
             target = target.transpose(2)
         return image, target

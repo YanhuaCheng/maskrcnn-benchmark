@@ -6,10 +6,8 @@ def build_transforms(cfg, is_train=True):
     if is_train:
         min_size = cfg.INPUT.MIN_SIZE_TRAIN
         max_size = cfg.INPUT.MAX_SIZE_TRAIN
-        
-		
         flip_prob = cfg.INPUT.FLIP_PROB_TRAIN
-		vertical_flip_prob = cfg.INPUT.VERTICAL_FLIP_PROB_TRAIN
+        vertical_flip_prob = cfg.INPUT.VERTICAL_FLIP_PROB_TRAIN
         flip_90_prob = cfg.INPUT.FLIP_90_PROB_TRAIN
         crop_prob = cfg.INPUT.CROP_PROB_TRAIN
         blur_prob = cfg.INPUT.BLUR_PROB_TRAIN
@@ -25,7 +23,7 @@ def build_transforms(cfg, is_train=True):
         crop_prob = 0
         blur_prob = 0
         contrast_prob = 0
-        hsv_prob = 0        
+        hsv_prob = 0
 
     to_bgr255 = cfg.INPUT.TO_BGR255
     normalize_transform = T.Normalize(

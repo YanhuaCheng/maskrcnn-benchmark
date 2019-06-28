@@ -1,15 +1,13 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import torch
-from torch.nn import functional as F
-
 from maskrcnn_benchmark.layers import smooth_l1_loss
+from maskrcnn_benchmark.modeling.balanced_positive_negative_sampler import \
+    BalancedPositiveNegativeSampler
 from maskrcnn_benchmark.modeling.box_coder import BoxCoder
 from maskrcnn_benchmark.modeling.matcher import Matcher
-from maskrcnn_benchmark.structures.boxlist_ops import boxlist_iou
-from maskrcnn_benchmark.modeling.balanced_positive_negative_sampler import (
-    BalancedPositiveNegativeSampler
-)
 from maskrcnn_benchmark.modeling.utils import cat
+from maskrcnn_benchmark.structures.boxlist_ops import boxlist_iou
+from torch.nn import functional as F
 
 
 class FastRCNNLossComputation(object):
@@ -23,8 +21,8 @@ class FastRCNNLossComputation(object):
         proposal_matcher,
         fg_bg_sampler,
         box_coder,
-		class_weights,
-		class_compete,
+        class_weights,
+        class_compete,
         cls_agnostic_bbox_reg=False
     ):
         """
@@ -37,7 +35,7 @@ class FastRCNNLossComputation(object):
         self.fg_bg_sampler = fg_bg_sampler
         self.box_coder = box_coder
         self.cls_agnostic_bbox_reg = cls_agnostic_bbox_reg
-		self.class_weights = class_weights
+        self.class_weights = class_weights
         self.class_compete = class_compete
 
     def match_targets_to_proposals(self, proposal, target):
@@ -187,7 +185,7 @@ def make_roi_box_loss_evaluator(cfg):
     class_weights = cfg.MODEL.ROI_BOX_HEAD.CLASS_WEIGHT
     class_compete = cfg.MODEL.ROI_BOX_HEAD.CLASS_COMPETE
     if len(class_weights) == 1:
-       class_weights = class_weights * cfg.MODEL.ROI_BOX_HEAD.NUM_CLASS
+       class_weights = class_weights * cfg.MODEL.ROI_BOX_HEAD.NUM_CLASSES
 
     fg_bg_sampler = BalancedPositiveNegativeSampler(
         cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE, cfg.MODEL.ROI_HEADS.POSITIVE_FRACTION
@@ -199,8 +197,8 @@ def make_roi_box_loss_evaluator(cfg):
         matcher,
         fg_bg_sampler,
         box_coder,
-		class_weights,
-		class_compete,
+        class_weights,
+        class_compete,
         cls_agnostic_bbox_reg
     )
 

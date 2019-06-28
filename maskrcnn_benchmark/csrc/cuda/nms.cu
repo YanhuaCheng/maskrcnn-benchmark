@@ -71,7 +71,7 @@ __global__ void nms_kernel(const int n_boxes, const float nms_overlap_thresh,
 }
 
 // boxes is a N x 5 tensor
-at::Tensor nms_cuda(const at::Tensor boxes, float nms_overlap_thresh,, bool iou_flag) {
+at::Tensor nms_cuda(const at::Tensor boxes, float nms_overlap_thresh, bool iou_flag) {
   using scalar_t = float;
   AT_ASSERTM(boxes.type().is_cuda(), "boxes must be a CUDA tensor");
   auto scores = boxes.select(1, 4);
