@@ -3,7 +3,6 @@ import os
 
 from yacs.config import CfgNode as CN
 
-
 # -----------------------------------------------------------------------------
 # Convention about Training / Test specific parameters
 # -----------------------------------------------------------------------------
@@ -68,6 +67,8 @@ _C.INPUT.HSV_PROB_TRAIN = 0.3
 # Dataset
 # -----------------------------------------------------------------------------
 _C.DATASETS = CN()
+# dataset prefix
+_C.DATASETS.DATASET_PREFIX = "full_product_det39"
 # List of the dataset names for training, as present in paths_catalog.py
 _C.DATASETS.TRAIN = ()
 # List of the dataset names for testing, as present in paths_catalog.py

@@ -14,7 +14,7 @@ from .collate_batch import BatchCollator, BBoxAugCollator
 from .transforms import build_transforms
 
 
-def build_dataset(dataset_list, transforms, dataset_catalog, is_train=True, mask_on=False, keypoint_on=False):
+def build_dataset(dataset_list, transforms, dataset_catalog, is_train=True, dataset_prefix="", mask_on=False, keypoint_on=False):
     """
     Arguments:
         dataset_list (list[str]): Contains the names of the datasets, i.e.,
@@ -30,7 +30,7 @@ def build_dataset(dataset_list, transforms, dataset_catalog, is_train=True, mask
         )
     datasets = []
     for dataset_name in dataset_list:
-        data = dataset_catalog.get(dataset_name)
+        data = dataset_catalog.get(dataset_name, dataset_prefix)
         factory = getattr(D, data["factory"])
         args = data["args"]
         # for COCODataset, we want to remove images without annotations
@@ -154,7 +154,7 @@ def make_data_loader(cfg, is_train=True, is_distributed=False, start_iter=0):
 
     # If bbox aug is enabled in testing, simply set transforms to None and we will apply transforms later
     transforms = None if not is_train and cfg.TEST.BBOX_AUG.ENABLED else build_transforms(cfg, is_train)
-    datasets = build_dataset(dataset_list, transforms, DatasetCatalog, is_train, cfg.MODEL.MASK_ON, cfg.MODEL.KEYPOINT_ON)
+    datasets = build_dataset(dataset_list, transforms, DatasetCatalog, is_train, cfg.DATASETS.DATASET_PREFIX, cfg.MODEL.MASK_ON, cfg.MODEL.KEYPOINT_ON)
 
     if is_train:
         # save category_id to label name mapping
