@@ -1,12 +1,10 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import torch
 import torch.nn.functional as F
-from torch import nn
-
-from maskrcnn_benchmark.structures.bounding_box import BoxList
-from maskrcnn_benchmark.structures.boxlist_ops import boxlist_nms
-from maskrcnn_benchmark.structures.boxlist_ops import cat_boxlist
 from maskrcnn_benchmark.modeling.box_coder import BoxCoder
+from maskrcnn_benchmark.structures.bounding_box import BoxList
+from maskrcnn_benchmark.structures.boxlist_ops import boxlist_nms, cat_boxlist
+from torch import nn
 
 
 class PostProcessor(nn.Module):
@@ -22,10 +20,10 @@ class PostProcessor(nn.Module):
         nms=0.5,
         detections_per_img=100,
         box_coder=None,
-		use_nms_inter_class=False, 
-		nms_inter_class=1.0, 
-		use_nms_area=False, 
-		nms_area=1.0,
+        use_nms_inter_class=False,
+        nms_inter_class=1.0,
+        use_nms_area=False,
+        nms_area=1.0,
         cls_agnostic_bbox_reg=False,
         bbox_aug_enabled=False
     ):
@@ -136,7 +134,7 @@ class PostProcessor(nn.Module):
             boxlist_for_class.add_field("scores", scores_j)
             boxlist_for_class.add_field("scores_all", scores_all)
             boxlist_for_class = boxlist_nms(
-                boxlist_for_class, self.nms, score_filed="scores", iou_flag=True
+                boxlist_for_class, self.nms, score_field="scores", iou_flag=True
             )
             if self.use_nms_area:
                boxlist_for_class.add_field("area", boxlist_for_class.area())
@@ -189,10 +187,10 @@ def make_roi_box_post_processor(cfg):
         nms_thresh,
         detections_per_img,
         box_coder,
-        use_nms_inter_class, 
-		nms_inter_class, 
-		use_nms_area, 
-		nms_area,		
+        use_nms_inter_class,
+        nms_inter_class,
+        use_nms_area,
+        nms_area,
         cls_agnostic_bbox_reg,
         bbox_aug_enabled
     )
