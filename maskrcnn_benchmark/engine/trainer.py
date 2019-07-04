@@ -5,11 +5,10 @@ import time
 
 import torch
 import torch.distributed as dist
-
+from apex import amp
 from maskrcnn_benchmark.utils.comm import get_world_size
 from maskrcnn_benchmark.utils.metric_logger import MetricLogger
 
-from apex import amp
 
 def reduce_loss_dict(loss_dict):
     """
@@ -55,7 +54,7 @@ def do_train(
     start_training_time = time.time()
     end = time.time()
     for iteration, (images, targets, _) in enumerate(data_loader, start_iter):
-        
+
         if any(len(target) < 1 for target in targets):
             logger.error(f"Iteration={iteration + 1} || Image Ids used for training {_} || targets Length={[len(target) for target in targets]}" )
             continue

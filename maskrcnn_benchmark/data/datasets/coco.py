@@ -6,6 +6,7 @@ import torchvision
 from maskrcnn_benchmark.structures.bounding_box import BoxList
 from maskrcnn_benchmark.structures.keypoint import PersonKeypoints
 from maskrcnn_benchmark.structures.segmentation_mask import SegmentationMask
+from maskrcnn_benchmark.utils.visualize import visual_transforms
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 min_keypoints_per_image = 10
@@ -98,6 +99,7 @@ class COCODataset(torchvision.datasets.coco.CocoDetection):
 
         if self._transforms is not None:
             img, target = self._transforms(img, target)
+            visual_transforms(img, target)
 
         return img, target, idx
 

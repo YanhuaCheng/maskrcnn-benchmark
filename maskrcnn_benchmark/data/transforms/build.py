@@ -41,8 +41,8 @@ def build_transforms(cfg, is_train=True):
             T.RandomHorizontalFlip(flip_prob),
             T.RandomVerticalFlip(vertical_flip_prob),
             T.RandomRotate90(flip_90_prob),
-            T.ToTensor(),
-            normalize_transform,
+            #T.ToTensor(),
+            #normalize_transform,
         ]
     )
     return transform
