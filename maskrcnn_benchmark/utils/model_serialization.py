@@ -1,8 +1,9 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-import logging
 from collections import OrderedDict
+import logging
 
 import torch
+
 from maskrcnn_benchmark.utils.imports import import_file
 
 
@@ -23,14 +24,6 @@ def align_and_update_state_dicts(model_state_dict, loaded_state_dict, ignore_cla
     """
     current_keys = sorted(list(model_state_dict.keys()))
     loaded_keys = sorted(list(loaded_state_dict.keys()))
-    #fw = open('/data/user/data/breezecheng/pytorch_project/maskrcnn-benchmark/running_folders/xx.txt', 'w')
-    #fw.write('model_state_dict\n')
-    #for key in current_keys:
-    #    fw.write('{}:{}\n'.format(key, model_state_dict[key].shape))
-    #fw = open('/data/user/data/breezecheng/pytorch_project/maskrcnn-benchmark/running_folders/xx2.txt', 'w')
-    #fw.write('loaded_state_dict\n')
-    #for key in loaded_keys:
-    #    fw.write('{}:{}\n'.format(key, loaded_state_dict[key].shape))
     # get a matrix of string matches, where each (i, j) entry correspond to the size of the
     # loaded_key string, if it matches
     match_matrix = [
