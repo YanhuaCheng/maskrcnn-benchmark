@@ -34,6 +34,7 @@ _C.MODEL.CLS_AGNOSTIC_BBOX_REG = False
 _C.MODEL.WEIGHT = ""
 # Adapt to different number of categories
 _C.MODEL.IGNORE_CLASS_WEIGHT_BIAS = False
+_C.MODEL.RESUME_CONTINUE = False
 
 # -----------------------------------------------------------------------------
 # INPUT
