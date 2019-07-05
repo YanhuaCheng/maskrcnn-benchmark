@@ -33,7 +33,7 @@ def build_transforms(cfg, is_train=True):
 
     transform = T.Compose(
         [
-            T.RandomCrop(crop_prob),
+            T.RandomValidAreaCrop(crop_prob),
             T.Resize(min_size, max_size),
             T.Blur(blur_prob),
             T.ContrastNormalization(contrast_prob),
@@ -78,13 +78,13 @@ def build_transforms_batch(cfg, is_train=True):
 
     transform_img = T.Compose(
         [
-            T.RandomValidAreaCrop(crop_prob), 
+            T.RandomValidAreaCrop(crop_prob),
             T.Blur(blur_prob),
             T.ContrastNormalization(contrast_prob),
             T.ChangeHSV(hsv_prob),
             T.RandomHorizontalFlip(flip_prob),
-            T.RandomVerticalFlip(vertical_flip_prob),            
-        ]    
+            T.RandomVerticalFlip(vertical_flip_prob),
+        ]
     )
     transform_batch = T.Compose(
         [
@@ -92,6 +92,6 @@ def build_transforms_batch(cfg, is_train=True):
            T.ResizeBatch(min_size, max_size),
            T.ToTensorBatch(),
            normalize_transform_batch,
-        ]   
-    )   
+        ]
+    )
     return transform_img, transform_batch

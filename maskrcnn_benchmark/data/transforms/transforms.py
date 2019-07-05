@@ -98,12 +98,14 @@ class ResizeBatch(object):
 
     def __call__(self, images, targets):
         assert(len(images) == len(targets))
+        images = list(images)
+        targets = list(targets)
         min_size = random.choice(self.min_size)
         for idx in range(len(images)):
             size = self.get_size(images[idx].size, min_size)
             images[idx] = F.resize(images[idx], size)
             targets[idx] = targets[idx].resize(images[idx].size)
-        return images, targets
+        return tuple(images), tuple(targets)
 
 class RandomHorizontalFlip(object):
     def __init__(self, prob=0.5):
@@ -132,9 +134,11 @@ class ToTensor(object):
 class ToTensorBatch(object):
     def __call__(self, images, targets):
         assert(len(images) == len(targets))
+        images = list(images)
+        targets = list(targets)
         for idx in range(len(images)):
             images[idx] = F.to_tensor(images[idx])
-        return images, targets
+        return tuple(images), tuple(targets)
 
 class Normalize(object):
     def __init__(self, mean, std, to_bgr255=True):
@@ -158,11 +162,13 @@ class NormalizeBatch(object):
 
     def __call__(self, images, targets):
         assert(len(images) == len(targets))
+        images = list(images)
+        targets = list(targets)
         for idx in range(len(images)):
             if self.to_bgr255:
                 images[idx] = images[idx][[2, 1, 0]] * 255
             images[idx] = F.normalize(images[idx], mean=self.mean, std=self.std)
-        return images, targets
+        return tuple(images), tuple(targets)
 
 class Blur(object):
     def __init__(self, prob=0.5):
@@ -210,7 +216,7 @@ class RandomValidAreaCrop(object):
     def __call__(self, image, target):
         if random.random() < self.prob:
            target, box = target.valid_area_crop()
-           image = image.crop(box)           
+           image = image.crop(box)
         return image, target
 
 class ChangeHSV(object):
@@ -237,14 +243,16 @@ class RandomRotate90(object):
             target = target.transpose(2)
         return image, target
 
-class Rotate90Batch(object):
+class RandomRotate90Batch(object):
     def __init__(self, prob=0.5):
         self.prob = prob
 
     def __call__(self, images, targets):
         if random.random() < self.prob:
             assert(len(images) == len(targets))
+            images = list(images)
+            targets = list(targets)
             for idx in range(len(images)):
                 images[idx] = F.rotate(images[idx], -90, expand=True)
                 targets[idx] = targets[idx].transpose(2)
-        return images, targets
+        return tuple(images), tuple(targets)

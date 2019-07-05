@@ -1,4 +1,6 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
+import random
+
 import torch
 
 # transpose
@@ -211,9 +213,9 @@ class BoxList(object):
         """
         TO_REMOVE = 1
         xmin, ymin, xmax, ymax = self._split_into_xyxy()
-        valid_area = [xmin.min().clamp(min=0, max=self.size[0]-TO_REMOVE), 
+        valid_area = [xmin.min().clamp(min=0, max=self.size[0]-TO_REMOVE),
                       ymin.min().clamp(min=0, max=self.size[1]-TO_REMOVE),
-                      xmax.max().clamp(min=0, max=self.size[0]-TO_REMOVE), 
+                      xmax.max().clamp(min=0, max=self.size[0]-TO_REMOVE),
                       ymax.max().clamp(min=0, max=self.size[1]-TO_REMOVE)]
         box = [random.randint(0, valid_area[0]), random.randint(0, valid_area[1]),
                 random.randint(valid_area[2], self.size[0]-TO_REMOVE), random.randint(valid_area[3], self.size[1]-TO_REMOVE)]

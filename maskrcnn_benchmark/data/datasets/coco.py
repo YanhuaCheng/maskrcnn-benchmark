@@ -99,7 +99,6 @@ class COCODataset(torchvision.datasets.coco.CocoDetection):
 
         if self._transforms is not None:
             img, target = self._transforms(img, target)
-            visual_transforms(img, target)
 
         return img, target, idx
 
