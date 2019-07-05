@@ -67,7 +67,7 @@ class Resize(object):
         target = target.resize(image.size)
         return image, target
 
-class BatchResize(object):
+class ResizeBatch(object):
     def __init__(self, min_size, max_size):
         if not isinstance(min_size, (list, tuple)):
             min_size = (min_size,)
@@ -75,9 +75,8 @@ class BatchResize(object):
         self.max_size = max_size
 
     # modified from torchvision to add support for max size
-    def get_size(self, image_size):
+    def get_size(self, image_size, size):
         w, h = image_size
-        size = random.choice(self.min_size)
         max_size = self.max_size
         if max_size is not None:
             min_original_size = float(min((w, h)))
@@ -100,12 +99,11 @@ class BatchResize(object):
     def __call__(self, images, targets):
         assert(len(images) == len(targets))
         min_size = random.choice(self.min_size)
-        size = self.get_size(image.size)
-        image = F.resize(image, size)
-        if target is None:
-            return image
-        target = target.resize(image.size)
-        return image, target
+        for idx in range(len(images)):
+            size = self.get_size(images[idx].size, min_size)
+            images[idx] = F.resize(images[idx], size)
+            targets[idx] = targets[idx].resize(images[idx].size)
+        return images, targets
 
 class RandomHorizontalFlip(object):
     def __init__(self, prob=0.5):
@@ -131,6 +129,13 @@ class ToTensor(object):
     def __call__(self, image, target):
         return F.to_tensor(image), target
 
+class ToTensorBatch(object):
+    def __call__(self, images, targets):
+        assert(len(images) == len(targets))
+        for idx in range(len(images)):
+            images[idx] = F.to_tensor(images[idx])
+        return images, targets
+
 class Normalize(object):
     def __init__(self, mean, std, to_bgr255=True):
         self.mean = mean
@@ -144,6 +149,20 @@ class Normalize(object):
         if target is None:
             return image
         return image, target
+
+class NormalizeBatch(object):
+    def __init__(self, mean, std, to_bgr255=True):
+        self.mean = mean
+        self.std = std
+        self.to_bgr255 = to_bgr255
+
+    def __call__(self, images, targets):
+        assert(len(images) == len(targets))
+        for idx in range(len(images)):
+            if self.to_bgr255:
+                images[idx] = images[idx][[2, 1, 0]] * 255
+            images[idx] = F.normalize(images[idx], mean=self.mean, std=self.std)
+        return images, targets
 
 class Blur(object):
     def __init__(self, prob=0.5):
@@ -179,9 +198,19 @@ class RandomCrop(object):
     def __call__(self, image, target):
         if random.random() < self.prob:
            w, h = image.size
-           bbox = [random.randint(0, int(w*0.1)), random.randint(0, int(h*0.1)), random.randint(int(w*0.9), w), random.randint(int(h*0.9), h)]
-           image = image.crop(bbox)
-           target = target.crop(bbox)
+           box = [random.randint(0, int(w*0.1)), random.randint(0, int(h*0.1)), random.randint(int(w*0.9), w), random.randint(int(h*0.9), h)]
+           image = image.crop(box)
+           target = target.crop(box)
+        return image, target
+
+class RandomValidAreaCrop(object):
+    def __init__(self, prob=0.5):
+        self.prob = prob
+
+    def __call__(self, image, target):
+        if random.random() < self.prob:
+           target, box = target.valid_area_crop()
+           image = image.crop(box)           
         return image, target
 
 class ChangeHSV(object):
@@ -208,7 +237,7 @@ class RandomRotate90(object):
             target = target.transpose(2)
         return image, target
 
-class BatchRotate90(object):
+class Rotate90Batch(object):
     def __init__(self, prob=0.5):
         self.prob = prob
 
