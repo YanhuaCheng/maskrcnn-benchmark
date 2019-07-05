@@ -203,6 +203,42 @@ class BoxList(object):
             bbox.add_field(k, v)
         return bbox.convert(self.mode)
 
+    def valid_area_crop(self):
+        """
+        Crops a rectangular region from this bounding box. The box is a
+        4-tuple defining the left, upper, right, and lower pixel
+        coordinate. The box must include all objects inside.
+        """
+        TO_REMOVE = 1
+        xmin, ymin, xmax, ymax = self._split_into_xyxy()
+        valid_area = [xmin.min().clamp(min=0, max=self.size[0]-TO_REMOVE), 
+                      ymin.min().clamp(min=0, max=self.size[1]-TO_REMOVE),
+                      xmax.max().clamp(min=0, max=self.size[0]-TO_REMOVE), 
+                      ymax.max().clamp(min=0, max=self.size[1]-TO_REMOVE)]
+        box = [random.randint(0, valid_area[0]), random.randint(0, valid_area[1]),
+                random.randint(valid_area[2], self.size[0]-TO_REMOVE), random.randint(valid_area[3], self.size[1]-TO_REMOVE)]
+
+        w, h = box[2] - box[0], box[3] - box[1]
+        cropped_xmin = (xmin - box[0]).clamp(min=0, max=w)
+        cropped_ymin = (ymin - box[1]).clamp(min=0, max=h)
+        cropped_xmax = (xmax - box[0]).clamp(min=0, max=w)
+        cropped_ymax = (ymax - box[1]).clamp(min=0, max=h)
+
+        # TODO should I filter empty boxes here?
+        if False:
+            is_empty = (cropped_xmin == cropped_xmax) | (cropped_ymin == cropped_ymax)
+
+        cropped_box = torch.cat(
+            (cropped_xmin, cropped_ymin, cropped_xmax, cropped_ymax), dim=-1
+        )
+        bbox = BoxList(cropped_box, (w, h), mode="xyxy")
+        # bbox._copy_extra_fields(self)
+        for k, v in self.extra_fields.items():
+            if not isinstance(v, torch.Tensor):
+                v = v.crop(box)
+            bbox.add_field(k, v)
+        return bbox.convert(self.mode), box
+
     # Tensor-like methods
 
     def to(self, device):

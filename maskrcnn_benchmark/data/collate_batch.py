@@ -9,14 +9,18 @@ class BatchCollator(object):
     This should be passed to the DataLoader
     """
 
-    def __init__(self, size_divisible=0):
+    def __init__(self, size_divisible=0, transforms_batch=None):
         self.size_divisible = size_divisible
+        self.transforms_batch = transforms_batch
 
     def __call__(self, batch):
         transposed_batch = list(zip(*batch))
-        images = to_image_list(transposed_batch[0], self.size_divisible)
+        images = transposed_batch[0]
         targets = transposed_batch[1]
         img_ids = transposed_batch[2]
+        if self.transforms_batch in not None:
+           images, targets = self.transforms_batch(images, targets)
+        images = to_image_list(images, self.size_divisible)
         return images, targets, img_ids
 
 

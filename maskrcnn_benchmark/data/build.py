@@ -11,7 +11,7 @@ from maskrcnn_benchmark.utils.miscellaneous import save_labels
 from . import datasets as D
 from . import samplers
 from .collate_batch import BatchCollator, BBoxAugCollator
-from .transforms import build_transforms
+from .transforms import build_transforms, build_transforms_batch
 
 
 def build_dataset(dataset_list, transforms, dataset_catalog, is_train=True, dataset_prefix="", mask_on=False, keypoint_on=False):
@@ -153,8 +153,12 @@ def make_data_loader(cfg, is_train=True, is_distributed=False, start_iter=0):
     dataset_list = cfg.DATASETS.TRAIN if is_train else cfg.DATASETS.TEST
 
     # If bbox aug is enabled in testing, simply set transforms to None and we will apply transforms later
-    transforms = None if not is_train and cfg.TEST.BBOX_AUG.ENABLED else build_transforms(cfg, is_train)
-    datasets = build_dataset(dataset_list, transforms, DatasetCatalog, is_train, cfg.DATASETS.DATASET_PREFIX, cfg.MODEL.MASK_ON, cfg.MODEL.KEYPOINT_ON)
+    if not is_train and cfg.TEST.BBOX_AUG.ENABLED:
+       transforms_img = None
+       transforms_batch = None
+    else:
+       transforms_img, transforms_batch = build_transforms_batch(cfg, is_train)
+    datasets = build_dataset(dataset_list, transforms_img, DatasetCatalog, is_train, cfg.DATASETS.DATASET_PREFIX, cfg.MODEL.MASK_ON, cfg.MODEL.KEYPOINT_ON)
 
     if is_train:
         # save category_id to label name mapping
@@ -167,7 +171,7 @@ def make_data_loader(cfg, is_train=True, is_distributed=False, start_iter=0):
             dataset, sampler, aspect_grouping, images_per_gpu, num_iters, start_iter
         )
         collator = BBoxAugCollator() if not is_train and cfg.TEST.BBOX_AUG.ENABLED else \
-            BatchCollator(cfg.DATALOADER.SIZE_DIVISIBILITY)
+            BatchCollator(cfg.DATALOADER.SIZE_DIVISIBILITY, transforms_batch)
         num_workers = cfg.DATALOADER.NUM_WORKERS
         data_loader = torch.utils.data.DataLoader(
             dataset,
