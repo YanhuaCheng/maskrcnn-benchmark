@@ -67,6 +67,45 @@ class Resize(object):
         target = target.resize(image.size)
         return image, target
 
+class BatchResize(object):
+    def __init__(self, min_size, max_size):
+        if not isinstance(min_size, (list, tuple)):
+            min_size = (min_size,)
+        self.min_size = min_size
+        self.max_size = max_size
+
+    # modified from torchvision to add support for max size
+    def get_size(self, image_size):
+        w, h = image_size
+        size = random.choice(self.min_size)
+        max_size = self.max_size
+        if max_size is not None:
+            min_original_size = float(min((w, h)))
+            max_original_size = float(max((w, h)))
+            if max_original_size / min_original_size * size > max_size:
+                size = int(round(max_size * min_original_size / max_original_size))
+
+        if (w <= h and w == size) or (h <= w and h == size):
+            return (h, w)
+
+        if w < h:
+            ow = size
+            oh = int(size * h / w)
+        else:
+            oh = size
+            ow = int(size * w / h)
+
+        return (oh, ow)
+
+    def __call__(self, images, targets):
+        assert(len(images) == len(targets))
+        min_size = random.choice(self.min_size)
+        size = self.get_size(image.size)
+        image = F.resize(image, size)
+        if target is None:
+            return image
+        target = target.resize(image.size)
+        return image, target
 
 class RandomHorizontalFlip(object):
     def __init__(self, prob=0.5):
@@ -168,3 +207,15 @@ class RandomRotate90(object):
             image = F.rotate(image, -90, expand=True)
             target = target.transpose(2)
         return image, target
+
+class BatchRotate90(object):
+    def __init__(self, prob=0.5):
+        self.prob = prob
+
+    def __call__(self, images, targets):
+        if random.random() < self.prob:
+            assert(len(images) == len(targets))
+            for idx in range(len(images)):
+                images[idx] = F.rotate(images[idx], -90, expand=True)
+                targets[idx] = targets[idx].transpose(2)
+        return images, targets
