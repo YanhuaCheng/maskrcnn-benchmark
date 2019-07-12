@@ -156,8 +156,12 @@ def make_data_loader(cfg, is_train=True, is_distributed=False, start_iter=0):
     if not is_train and cfg.TEST.BBOX_AUG.ENABLED:
        transforms_img = None
        transforms_batch = None
-    else:
+    elif cfg.INPUT.BATCH_TRANSFORM:
        transforms_img, transforms_batch = build_transforms_batch(cfg, is_train)
+    else:
+       transforms_img = build_transforms(cfg, is_train)
+       transforms_batch = None
+
     datasets = build_dataset(dataset_list, transforms_img, DatasetCatalog, is_train, cfg.DATASETS.DATASET_PREFIX, cfg.MODEL.MASK_ON, cfg.MODEL.KEYPOINT_ON)
 
     if is_train:

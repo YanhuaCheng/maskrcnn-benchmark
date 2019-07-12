@@ -3,10 +3,9 @@ import logging
 import os
 
 import torch
-
-from maskrcnn_benchmark.utils.model_serialization import load_state_dict
 from maskrcnn_benchmark.utils.c2_model_loading import load_c2_format
 from maskrcnn_benchmark.utils.imports import import_file
+from maskrcnn_benchmark.utils.model_serialization import load_state_dict
 from maskrcnn_benchmark.utils.model_zoo import cache_url
 
 
@@ -20,6 +19,7 @@ class Checkpointer(object):
         save_to_disk=None,
         logger=None,
         ignore_class_weight_bias=False,
+        resume_continue=False,
     ):
         self.model = model
         self.optimizer = optimizer
@@ -30,6 +30,7 @@ class Checkpointer(object):
             logger = logging.getLogger(__name__)
         self.logger = logger
         self.ignore_class_weight_bias = ignore_class_weight_bias
+        self.resume_continue = resume_continue
 
     def save(self, name, **kwargs):
         if not self.save_dir:
@@ -62,10 +63,10 @@ class Checkpointer(object):
         self.logger.info("Loading checkpoint from {}".format(f))
         checkpoint = self._load_file(f)
         self._load_model(checkpoint)
-        if "optimizer" in checkpoint and self.optimizer and (not self.ignore_class_weight_bias):
+        if "optimizer" in checkpoint and self.optimizer and self.resume_continue:
             self.logger.info("Loading optimizer from {}".format(f))
             self.optimizer.load_state_dict(checkpoint.pop("optimizer"))
-        if "scheduler" in checkpoint and self.scheduler and (not self.ignore_class_weight_bias):
+        if "scheduler" in checkpoint and self.scheduler and self.resume_continue:
             self.logger.info("Loading scheduler from {}".format(f))
             self.scheduler.load_state_dict(checkpoint.pop("scheduler"))
 
@@ -112,7 +113,7 @@ class DetectronCheckpointer(Checkpointer):
         logger=None,
     ):
         super(DetectronCheckpointer, self).__init__(
-            model, optimizer, scheduler, save_dir, save_to_disk, logger, cfg.MODEL.IGNORE_CLASS_WEIGHT_BIAS
+            model, optimizer, scheduler, save_dir, save_to_disk, logger, cfg.MODEL.IGNORE_CLASS_WEIGHT_BIAS, cfg.MODEL.RESUME_CONTINUE
         )
         self.cfg = cfg.clone()
 

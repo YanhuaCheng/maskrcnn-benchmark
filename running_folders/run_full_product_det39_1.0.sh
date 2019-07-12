@@ -28,7 +28,7 @@
 #cd /mnt/yardcephfs/mmyard/g_wxg_ob_dc/breezecheng/pytorch_project/maskrcnn-benchmark/ver4/maskrcnn-benchmark/
 cd /data/user/data/breezecheng/pytorch_project/maskrcnn-benchmark/
 
-DATASET_PREFIX="full_product_det39"
+DATASET_PREFIX="full_product_det11"
 TAG=1.0
-NGPUS=2
-python -m torch.distributed.launch --nproc_per_node=$NGPUS tools/train_net.py --config-file "configs/full_product39_faster_rcnn_R_50_FPN_1x.yaml"  DATASETS.DATASET_PREFIX ${DATASET_PREFIX} OUTPUT_DIR log/log_${DATASET_PREFIX}_${TAG} DTYPE "float16"
+NGPUS=4
+python -m torch.distributed.launch --nproc_per_node=$NGPUS tools/train_net.py --config-file "configs/full_product11_faster_rcnn_R_50_FPN_1x.yaml"  DATASETS.DATASET_PREFIX ${DATASET_PREFIX} OUTPUT_DIR log/log_${DATASET_PREFIX}_${TAG} DTYPE "float16"
