@@ -13,7 +13,7 @@ from maskrcnn_benchmark.engine.inference import inference
 from maskrcnn_benchmark.modeling.detector import build_detection_model
 from maskrcnn_benchmark.utils.checkpoint import DetectronCheckpointer
 from maskrcnn_benchmark.utils.collect_env import collect_env_info
-from maskrcnn_benchmark.utils.comm import synchronize, get_rank
+from maskrcnn_benchmark.utils.comm import get_rank, synchronize
 from maskrcnn_benchmark.utils.logger import setup_logger
 from maskrcnn_benchmark.utils.miscellaneous import mkdir
 
@@ -61,8 +61,10 @@ def main():
     cfg.merge_from_list(args.opts)
     cfg.freeze()
 
-    save_dir = ""
-    logger = setup_logger("maskrcnn_benchmark", save_dir, get_rank())
+    output_dir = cfg.OUTPUT_DIR
+    if output_dir:
+        mkdir(output_dir)
+    logger = setup_logger("maskrcnn_benchmark", output_dir, get_rank())
     logger.info("Using {} GPUs".format(num_gpus))
     logger.info(cfg)
 
@@ -76,7 +78,6 @@ def main():
     use_mixed_precision = cfg.DTYPE == 'float16'
     amp_handle = amp.init(enabled=use_mixed_precision, verbose=cfg.AMP_VERBOSE)
 
-    output_dir = cfg.OUTPUT_DIR
     checkpointer = DetectronCheckpointer(cfg, model, save_dir=output_dir)
     ckpt = cfg.MODEL.WEIGHT if args.ckpt is None else args.ckpt
     _ = checkpointer.load(ckpt, use_latest=args.ckpt is None)

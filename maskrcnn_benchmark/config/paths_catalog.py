@@ -99,6 +99,10 @@ class DatasetCatalog(object):
         "img_dir": "meizhuang_2w",
         "ann_file": "annotations/meizhuang_2w.json"
       },
+      "coco_meizhuang_2w_v3": {
+        "img_dir": "meizhuang_2w",
+        "ann_file": "annotations/meizhuang_2w_v3.json"
+      },
       "coco_wanjuyueqi": {
         "img_dir": "wanjuyueqi",
         "ann_file": "annotations/wanjuyueqi.json"
@@ -198,6 +202,10 @@ class DatasetCatalog(object):
       "coco_tushu3": {
         "img_dir": "tushu3",
         "ann_file": "annotations/tushu3.json"
+      },
+      "coco_test_det": {
+        "img_dir": "test_det",
+        "ann_file": "annotations/test_det.json"
       }
     }
 
