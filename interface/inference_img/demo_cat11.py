@@ -19,14 +19,14 @@ from maskrcnn_benchmark.config import cfg
 from predictor_cat11 import COCODemo
 
 # update the config options with the config file
-config_file = "../../configs/inference_full_product39_faster_rcnn_R_50_FPN_1x.yaml"
+config_file = "../../configs/inference_full_product11_faster_rcnn_retinanet_R-50-FPN_1x.yaml"
 cfg.merge_from_file(config_file)
 # manual override some options
 # cfg.merge_from_list(["MODEL.DEVICE", "cpu"])
 cfg.merge_from_list(["MODEL.ROI_BOX_HEAD.NUM_CLASSES", 12])
 cfg.merge_from_list(["MODEL.IGNORE_CLASS_WEIGHT_BIAS", False])
 cfg.merge_from_list(["MODEL.ROI_HEADS.NMS", 0.3])
-cfg.merge_from_list(["MODEL.WEIGHT", '../../pretrained_models/.torch/models/full_product_det11_384-512_v4_classs_weight_0200000.pth'])
+cfg.merge_from_list(["MODEL.WEIGHT", '../../pretrained_models/.torch/models/full_product_det11_448-576_retinanet_0200000.pth'])
 
 visualize_flag = True
 data_source = 1 #0: query, 1: product
