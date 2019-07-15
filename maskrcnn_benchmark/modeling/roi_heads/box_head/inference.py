@@ -22,8 +22,8 @@ class PostProcessor(nn.Module):
         box_coder=None,
         use_nms_inter_class=False,
         nms_inter_class=1.0,
-        use_nms_area=False,
-        nms_area=1.0,
+        use_nms_iom=False,
+        nms_iom=1.0,
         cls_agnostic_bbox_reg=False,
         bbox_aug_enabled=False
     ):
@@ -45,8 +45,8 @@ class PostProcessor(nn.Module):
         self.bbox_aug_enabled = bbox_aug_enabled
         self.use_nms_inter_class = use_nms_inter_class
         self.nms_inter_class = nms_inter_class
-        self.use_nms_area = use_nms_area
-        self.nms_area = nms_area
+        self.use_nms_iom = use_nms_iom
+        self.nms_iom = nms_iom
 
     def forward(self, x, boxes):
         """
@@ -136,10 +136,10 @@ class PostProcessor(nn.Module):
             boxlist_for_class = boxlist_nms(
                 boxlist_for_class, self.nms, score_field="scores", iou_flag=True
             )
-            if self.use_nms_area:
-               boxlist_for_class.add_field("area", boxlist_for_class.area())
+            if self.use_nms_iom:
+               #boxlist_for_class.add_field("area", boxlist_for_class.area())
                boxlist_for_class = boxlist_nms(
-                   boxlist_for_class, self.nms_area, score_field="area", iou_flag=False
+                   boxlist_for_class, self.nms_iom, score_field="scores", iou_flag=False
                )
             num_labels = len(boxlist_for_class)
             boxlist_for_class.add_field(
@@ -150,7 +150,7 @@ class PostProcessor(nn.Module):
         result = cat_boxlist(result)
         if self.use_nms_inter_class:
             result = boxlist_nms(
-                result, self.nms_inter_class, score_field="scores"
+                result, self.nms_inter_class, score_field="scores", iou_flag=True
             )
         number_of_detections = len(result)
 
@@ -179,8 +179,8 @@ def make_roi_box_post_processor(cfg):
     bbox_aug_enabled = cfg.TEST.BBOX_AUG.ENABLED
     use_nms_inter_class = cfg.MODEL.ROI_HEADS.USE_NMS_INTER_CLASS
     nms_inter_class = cfg.MODEL.ROI_HEADS.NMS_INTER_CLASS
-    use_nms_area = cfg.MODEL.ROI_HEADS.USE_NMS_AREA
-    nms_area = cfg.MODEL.ROI_HEADS.NMS_AREA
+    use_nms_iom = cfg.MODEL.ROI_HEADS.USE_NMS_IOM
+    nms_iom = cfg.MODEL.ROI_HEADS.NMS_IOM
 
     postprocessor = PostProcessor(
         score_thresh,
@@ -189,8 +189,8 @@ def make_roi_box_post_processor(cfg):
         box_coder,
         use_nms_inter_class,
         nms_inter_class,
-        use_nms_area,
-        nms_area,
+        use_nms_iom,
+        nms_iom,
         cls_agnostic_bbox_reg,
         bbox_aug_enabled
     )

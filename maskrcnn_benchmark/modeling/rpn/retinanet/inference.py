@@ -25,6 +25,10 @@ class RetinaNetPostProcessor(RPNPostProcessor):
         min_size,
         num_classes,
         box_coder=None,
+        use_nms_inter_class=False,
+        nms_inter_class=1.0,
+        use_nms_iom=False,
+        nms_iom=1.0,
     ):
         """
         Arguments:
@@ -72,6 +76,7 @@ class RetinaNetPostProcessor(RPNPostProcessor):
         # put in the same format as anchors
         box_cls = permute_and_flatten(box_cls, N, A, C, H, W)
         box_cls = box_cls.sigmoid()
+        anchor_score = box_cls.reshape(N, -1, C)
 
         box_regression = permute_and_flatten(box_regression, N, A, 4, H, W)
         box_regression = box_regression.reshape(N, -1, 4)
@@ -84,8 +89,9 @@ class RetinaNetPostProcessor(RPNPostProcessor):
         pre_nms_top_n = pre_nms_top_n.clamp(max=self.pre_nms_top_n)
 
         results = []
-        for per_box_cls, per_box_regression, per_pre_nms_top_n, \
+        for per_anchor_score, per_box_cls, per_box_regression, per_pre_nms_top_n, \
         per_candidate_inds, per_anchors in zip(
+            anchor_score,
             box_cls,
             box_regression,
             pre_nms_top_n,
@@ -118,6 +124,7 @@ class RetinaNetPostProcessor(RPNPostProcessor):
             boxlist = BoxList(detections, per_anchors.size, mode="xyxy")
             boxlist.add_field("labels", per_class)
             boxlist.add_field("scores", per_box_cls)
+            boxlist.add_field("scores_all", per_anchor_score[per_box_loc, :].view(-1, C))
             boxlist = boxlist.clip_to_image(remove_empty=False)
             boxlist = remove_small_boxes(boxlist, self.min_size)
             results.append(boxlist)
@@ -133,6 +140,7 @@ class RetinaNetPostProcessor(RPNPostProcessor):
         results = []
         for i in range(num_images):
             scores = boxlists[i].get_field("scores")
+            scores_all = boxlists[i].get_field("scores_all")
             labels = boxlists[i].get_field("labels")
             boxes = boxlists[i].bbox
             boxlist = boxlists[i]
@@ -142,13 +150,19 @@ class RetinaNetPostProcessor(RPNPostProcessor):
                 inds = (labels == j).nonzero().view(-1)
 
                 scores_j = scores[inds]
+                scores_j_all = scores_all[inds]
                 boxes_j = boxes[inds, :].view(-1, 4)
                 boxlist_for_class = BoxList(boxes_j, boxlist.size, mode="xyxy")
                 boxlist_for_class.add_field("scores", scores_j)
+                boxlist_for_class.add_field("scores_all", scores_j_all)
                 boxlist_for_class = boxlist_nms(
                     boxlist_for_class, self.nms_thresh,
-                    score_field="scores"
+                    score_field="scores", iou_flag=True
                 )
+                if self.use_nms_iom:                
+                    boxlist_for_class = boxlist_nms(
+                        boxlist_for_class, self.nms_iom, score_field="scores", iou_flag=False
+                    )
                 num_labels = len(boxlist_for_class)
                 boxlist_for_class.add_field(
                     "labels", torch.full((num_labels,), j,
@@ -158,6 +172,10 @@ class RetinaNetPostProcessor(RPNPostProcessor):
                 result.append(boxlist_for_class)
 
             result = cat_boxlist(result)
+            if self.use_nms_inter_class:
+                result = boxlist_nms(
+                    result, self.nms_inter_class, score_field="scores", iou_flag=True
+                )
             number_of_detections = len(result)
 
             # Limit to max_per_image detections **over all classes**
@@ -180,6 +198,10 @@ def make_retinanet_postprocessor(config, rpn_box_coder, is_train):
     nms_thresh = config.MODEL.RETINANET.NMS_TH
     fpn_post_nms_top_n = config.TEST.DETECTIONS_PER_IMG
     min_size = 0
+    use_nms_inter_class = config.MODEL.RETINANET.USE_NMS_INTER_CLASS 
+    nms_inter_class = config.MODEL.RETINANET.NMS_INTER_CLASS
+    use_nms_iom = config.MODEL.RETINANET.USE_NMS_IOM 
+    nms_iom = config.MODEL.RETINANET.NMS_IOM
 
     box_selector = RetinaNetPostProcessor(
         pre_nms_thresh=pre_nms_thresh,
@@ -189,6 +211,10 @@ def make_retinanet_postprocessor(config, rpn_box_coder, is_train):
         min_size=min_size,
         num_classes=config.MODEL.RETINANET.NUM_CLASSES,
         box_coder=rpn_box_coder,
+        use_nms_inter_class=use_nms_inter_class,
+        nms_inter_class=nms_inter_class,
+        use_nms_iom=use_nms_iom,
+        nms_iom=nms_iom,
     )
 
     return box_selector

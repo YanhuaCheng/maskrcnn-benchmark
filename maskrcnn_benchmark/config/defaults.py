@@ -208,9 +208,9 @@ _C.MODEL.ROI_HEADS.SCORE_THRESH_HIGH = 0.05
 # IoU >= this threshold)
 _C.MODEL.ROI_HEADS.NMS = 0.5 #intra-class
 _C.MODEL.ROI_HEADS.USE_NMS_INTER_CLASS = False #inter-class
-_C.MODEL.ROI_HEADS.NMS_INTER_CLASS = 0.7 #inter-class
-_C.MODEL.ROI_HEADS.USE_NMS_AREA = False
-_C.MODEL.ROI_HEADS.NMS_AREA = 0.8
+_C.MODEL.ROI_HEADS.NMS_INTER_CLASS = 1.0 #inter-class
+_C.MODEL.ROI_HEADS.USE_NMS_IOM = False
+_C.MODEL.ROI_HEADS.NMS_IOM = 1.0
 # Maximum number of detections to return per image (100 is based on the limit
 # established for the COCO dataset)
 _C.MODEL.ROI_HEADS.DETECTIONS_PER_IMG = 100
@@ -358,6 +358,12 @@ _C.MODEL.RETINANET.INFERENCE_TH = 0.05
 
 # NMS threshold used in RetinaNet
 _C.MODEL.RETINANET.NMS_TH = 0.4
+
+# inference paramter for retinanet
+_C.MODEL.RETINANET.USE_NMS_INTER_CLASS = False
+_C.MODEL.RETINANET.NMS_INTER_CLASS = 1.0 
+_C.MODEL.RETINANET.USE_NMS_IOM = False
+_C.MODEL.RETINANET.NMS_IOM = 1.0
 
 
 # ---------------------------------------------------------------------------- #
