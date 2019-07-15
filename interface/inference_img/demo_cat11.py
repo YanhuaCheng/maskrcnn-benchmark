@@ -26,7 +26,7 @@ cfg.merge_from_file(config_file)
 cfg.merge_from_list(["MODEL.ROI_BOX_HEAD.NUM_CLASSES", 12])
 cfg.merge_from_list(["MODEL.IGNORE_CLASS_WEIGHT_BIAS", False])
 cfg.merge_from_list(["MODEL.ROI_HEADS.NMS", 0.3])
-cfg.merge_from_list(["MODEL.WEIGHT", '../../pretrained_models/.torch/models/full_product_det11_448-576_retinanet_0200000.pth'])
+cfg.merge_from_list(["MODEL.WEIGHT", '../../pretrained_models/.torch/models/full_product_det11_448-576_retinanet_0025000.pth'])
 
 visualize_flag = True
 data_source = 1 #0: query, 1: product
@@ -60,8 +60,8 @@ else:
    cfg.merge_from_list(["MODEL.ROI_HEADS.SCORE_THRESH_HIGH", score_thresh_high])
    cfg.merge_from_list(["MODEL.ROI_HEADS.USE_NMS_INTER_CLASS", True])
    cfg.merge_from_list(["MODEL.ROI_HEADS.NMS_INTER_CLASS", 0.6])
-   cfg.merge_from_list(["MODEL.ROI_HEADS.USE_NMS_AREA", True])
-   cfg.merge_from_list(["MODEL.ROI_HEADS.NMS_AREA", 0.8])
+   cfg.merge_from_list(["MODEL.ROI_HEADS.USE_NMS_IOM", True])
+   cfg.merge_from_list(["MODEL.ROI_HEADS.NMS_IOM", 0.8])
 
 coco_demo = COCODemo(cfg, data_source=data_source, min_image_size=min_image_size, score_weight=score_weight, pos_weight=pos_weight, area_weight=area_weight, min_bbox_w=min_bbox_w, min_bbox_h=min_bbox_h, min_bbox_area=min_bbox_area, topn=topn, visualize_flag=visualize_flag)
 # load image and then run prediction

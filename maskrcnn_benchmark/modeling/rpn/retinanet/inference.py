@@ -1,14 +1,13 @@
 import torch
-
-from ..inference import RPNPostProcessor
-from ..utils import permute_and_flatten
-
 from maskrcnn_benchmark.modeling.box_coder import BoxCoder
 from maskrcnn_benchmark.modeling.utils import cat
 from maskrcnn_benchmark.structures.bounding_box import BoxList
-from maskrcnn_benchmark.structures.boxlist_ops import cat_boxlist
-from maskrcnn_benchmark.structures.boxlist_ops import boxlist_nms
-from maskrcnn_benchmark.structures.boxlist_ops import remove_small_boxes
+from maskrcnn_benchmark.structures.boxlist_ops import (boxlist_nms,
+                                                       cat_boxlist,
+                                                       remove_small_boxes)
+
+from ..inference import RPNPostProcessor
+from ..utils import permute_and_flatten
 
 
 class RetinaNetPostProcessor(RPNPostProcessor):
@@ -49,11 +48,15 @@ class RetinaNetPostProcessor(RPNPostProcessor):
         self.fpn_post_nms_top_n = fpn_post_nms_top_n
         self.min_size = min_size
         self.num_classes = num_classes
+        self.use_nms_inter_class = use_nms_inter_class
+        self.nms_inter_class = nms_inter_class
+        self.use_nms_iom = use_nms_iom
+        self.nms_iom = nms_iom
 
         if box_coder is None:
             box_coder = BoxCoder(weights=(10., 10., 5., 5.))
         self.box_coder = box_coder
- 
+
     def add_gt_proposals(self, proposals, targets):
         """
         This function is not used in RetinaNet
@@ -100,12 +103,12 @@ class RetinaNetPostProcessor(RPNPostProcessor):
 
             # Sort and select TopN
             # TODO most of this can be made out of the loop for
-            # all images. 
+            # all images.
             # TODO:Yang: Not easy to do. Because the numbers of detections are
             # different in each image. Therefore, this part needs to be done
-            # per image. 
+            # per image.
             per_box_cls = per_box_cls[per_candidate_inds]
- 
+
             per_box_cls, top_k_indices = \
                     per_box_cls.topk(per_pre_nms_top_n, sorted=False)
 
@@ -159,9 +162,9 @@ class RetinaNetPostProcessor(RPNPostProcessor):
                     boxlist_for_class, self.nms_thresh,
                     score_field="scores", iou_flag=True
                 )
-                if self.use_nms_iom:                
+                if self.use_nms_iom:
                     boxlist_for_class = boxlist_nms(
-                        boxlist_for_class, self.nms_iom, score_field="scores", iou_flag=False
+                            boxlist_for_class, self.nms_iom, score_field="scores", iou_flag=False
                     )
                 num_labels = len(boxlist_for_class)
                 boxlist_for_class.add_field(
@@ -198,9 +201,9 @@ def make_retinanet_postprocessor(config, rpn_box_coder, is_train):
     nms_thresh = config.MODEL.RETINANET.NMS_TH
     fpn_post_nms_top_n = config.TEST.DETECTIONS_PER_IMG
     min_size = 0
-    use_nms_inter_class = config.MODEL.RETINANET.USE_NMS_INTER_CLASS 
+    use_nms_inter_class = config.MODEL.RETINANET.USE_NMS_INTER_CLASS
     nms_inter_class = config.MODEL.RETINANET.NMS_INTER_CLASS
-    use_nms_iom = config.MODEL.RETINANET.USE_NMS_IOM 
+    use_nms_iom = config.MODEL.RETINANET.USE_NMS_IOM
     nms_iom = config.MODEL.RETINANET.NMS_IOM
 
     box_selector = RetinaNetPostProcessor(

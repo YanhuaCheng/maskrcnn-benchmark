@@ -173,7 +173,10 @@ class COCODemo(object):
             boxes = predictions[[rank_idx]].bbox
             box = boxes[0].to(torch.int64)
             top_prediction['bbox'] = box[:4].tolist()
-            scores, labels = scores_all[0][1:].sort(0, descending=True)
+            if scores_all.shape[1] < len(self.CATEGORIES):
+                scores, labels = scores_all[0][0:].sort(0, descending=True)
+            else:
+                scores, labels = scores_all[0][1:].sort(0, descending=True)
             top_prediction['category'] = [self.CATEGORIES[label+1] for label in labels]
             top_prediction['score'] = [score.item() for score in scores]
             top_predictions.append(top_prediction)
