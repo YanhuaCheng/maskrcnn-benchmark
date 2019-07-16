@@ -1,0 +1,48 @@
+MODEL:
+  META_ARCHITECTURE: "GeneralizedRCNN"
+  WEIGHT: "/data/user/data/breezecheng/pytorch_project/maskrcnn-benchmark/pretrained_models/.torch/models/R-50.pkl"
+  IGNORE_CLASS_WEIGHT_BIAS: False
+  BACKBONE:
+    CONV_BODY: "R-50-FPN"
+  RESNETS:
+    BACKBONE_OUT_CHANNELS: 256
+  RPN:
+    USE_FPN: True
+    ANCHOR_STRIDE: (4, 8, 16, 32, 64)
+    PRE_NMS_TOP_N_TRAIN: 2000
+    PRE_NMS_TOP_N_TEST: 1000
+    POST_NMS_TOP_N_TEST: 1000
+    FPN_POST_NMS_TOP_N_TRAIN: 4000
+    FPN_POST_NMS_TOP_N_TEST: 1000
+  ROI_HEADS:
+    USE_FPN: True
+  ROI_BOX_HEAD:
+    NUM_CLASSES: 12
+    CLASS_WEIGHT: (1.0, )
+    POOLER_RESOLUTION: 7
+    POOLER_SCALES: (0.25, 0.125, 0.0625, 0.03125)
+    POOLER_SAMPLING_RATIO: 2
+    FEATURE_EXTRACTOR: "FPN2MLPFeatureExtractor"
+    PREDICTOR: "FPNPredictor"
+INPUT:
+  MIN_SIZE_TRAIN: (384, 416, 448, 480, 512)
+  MIN_SIZE_TEST: 448
+  FLIP_PROB_TRAIN: 0.5
+  VERTICAL_FLIP_PROB_TRAIN: 0.1
+  FLIP_90_PROB_TRAIN: 0.1
+  CROP_PROB_TRAIN: 0.1
+  BLUR_PROB_TRAIN: 0.5
+  CONTRAST_PROB_TRAIN: 0.5
+  HSV_PROB_TRAIN: 0.5
+DATASETS:
+    #TRAIN: ("coco_human_parsing","coco_cat09","coco_shengxian","coco_jiadian2","coco_meizhuang_1w","coco_bag_purse_8000","coco_jiulei","coco_shouji_extra","coco_shoes","coco_cat06","coco_shipinbuchong","coco_zhubaoshoushi","coco_jiadian1_extra","coco_tushu","coco_cat04","coco_tushu1","coco_shouji","coco_muying_shipin","coco_jiazhuang","coco_car","coco_bag","coco_muying_jiaju","coco_meizhuang_2w","coco_wanjuyueqi","coco_cat05","coco_feicui","coco_cat10","coco_muying_wanjuyuqi","coco_suitcase_2w","coco_diannaobangong","coco_jiadian1","coco_ali_clothing","coco_hetianyu","coco_cat07","coco_jiadian2_extra","coco_shipinyinliao","coco_yiyaobaojian","coco_clothes_nohuman5k","coco_jiadian3","coco_shoujike_annotated","coco_neiyiku_4k","coco_chuju","coco_cat08","coco_cat11","coco_jiaju","coco_tushu2","coco_shuma","coco_tushu3",)
+  TEST: ("coco_test_det",)
+  TRAIN: ("coco_shoujike_annotated", "coco_jiaju")
+DATALOADER:
+  SIZE_DIVISIBILITY: 32
+SOLVER:
+  BASE_LR: 0.02
+  WEIGHT_DECAY: 0.0001
+  STEPS: (50000, 100000, 140000, 180000)
+  MAX_ITER: 200000
+  IMS_PER_BATCH: 2 #24
