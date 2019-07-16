@@ -19,6 +19,22 @@ from yacs.config import CfgNode as CN
 
 _C = CN()
 
+# -----------------------------------------------------------------------------
+# DEPLOY
+# -----------------------------------------------------------------------------
+_C.DEPLOY = CN()
+cfg.DEPLOY.SCORE_WEIGHT = 0.60
+cfg.DEPLOY.POS_WEIGHT = 0.30
+cfg.DEPLOY.AREA_WEIGHT = 0.10
+cfg.DEPLOY.MIN_BBOX_W = 0.05
+cfg.DEPLOY.MIN_BBOX_H = 0.05 
+cfg.DEPLOY.MIN_BBOX_AREA = 0.01
+cfg.DEPLOY.TOPN = 5
+cfg.DEPLOY.VISUALIZE = True
+
+# -----------------------------------------------------------------------------
+# MODEL
+# -----------------------------------------------------------------------------
 _C.MODEL = CN()
 _C.MODEL.RPN_ONLY = False
 _C.MODEL.MASK_ON = False
