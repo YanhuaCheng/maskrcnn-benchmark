@@ -85,3 +85,18 @@ class Normalize(object):
         image = F.normalize(image, mean=self.mean, std=self.std)
         return image
 
+class UnNormalize(object):
+    def __init__(self, mean, std):
+        self.mean = mean
+        self.std = std
+
+    def __call__(self, img_tensor):
+        """
+            img_tensor: CxHxW --> HxWxC
+        """
+        dtype = img_tensor.dtype
+        mean = torch.as_tensor(self.mean, dtype=dtype, device=img_tensor.device)
+        std = torch.as_tensor(self.std, dtype=dtype, device=img_tensor.device)
+        img_tensor.mul_(std[:, None, None]).add_(mean[:, None, None])
+        img_tensor = img_tensor.transpose(0, 1).transpose(1, 2).contiguous()
+        return img_tensor

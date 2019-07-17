@@ -1,21 +1,17 @@
 # from torchvision import transforms
-import random
+import os
 
 import numpy as np
-import torch
-import torchvision
+from PIL import Image, ImageFile
+
 import transforms as T
-from maskrcnn_benchmark.structures.image_list import to_image_list
-from torch.utils.data import DataLoader
-from torch.utils.data import Dataset
-from torchvision.transforms import functional as F
-from PIL import Image
-from PIL import ImageFile
+from torch.utils.data import DataLoader, Dataset
+
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 class dataset(Dataset):
 
-    """Face Landmarks dataset."""
+    """load dataset."""
 
     def __init__(self, img_list, root_dir, transform=None):
         self.root_dir = root_dir
@@ -33,7 +29,6 @@ class dataset(Dataset):
             image = self.transform(image)
 
         return self.img_list[idx], image, img_h, img_w
-
 
 def build_transforms(cfg):
     min_size = cfg.INPUT.MIN_SIZE_TEST

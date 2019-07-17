@@ -23,14 +23,16 @@ _C = CN()
 # DEPLOY
 # -----------------------------------------------------------------------------
 _C.DEPLOY = CN()
-cfg.DEPLOY.SCORE_WEIGHT = 0.60
-cfg.DEPLOY.POS_WEIGHT = 0.30
-cfg.DEPLOY.AREA_WEIGHT = 0.10
-cfg.DEPLOY.MIN_BBOX_W = 0.05
-cfg.DEPLOY.MIN_BBOX_H = 0.05 
-cfg.DEPLOY.MIN_BBOX_AREA = 0.01
-cfg.DEPLOY.TOPN = 5
-cfg.DEPLOY.VISUALIZE = True
+_C.DEPLOY.DATA_SOURCE = 0
+_C.DEPLOY.SCORE_WEIGHT = 0.60
+_C.DEPLOY.POS_WEIGHT = 0.30
+_C.DEPLOY.AREA_WEIGHT = 0.10
+_C.DEPLOY.MIN_BBOX_W = 0.05
+_C.DEPLOY.MIN_BBOX_H = 0.05
+_C.DEPLOY.MIN_BBOX_AREA = 0.01
+_C.DEPLOY.SCORE_THRESH_HIGH = 0.3
+_C.DEPLOY.TOPN = 5
+_C.DEPLOY.VISUALIZE = True
 
 # -----------------------------------------------------------------------------
 # MODEL
@@ -219,7 +221,6 @@ _C.MODEL.ROI_HEADS.POSITIVE_FRACTION = 0.25
 # balance obtaining high recall with not having too many low precision
 # detections that will slow down inference post processing steps (like NMS)
 _C.MODEL.ROI_HEADS.SCORE_THRESH = 0.05
-_C.MODEL.ROI_HEADS.SCORE_THRESH_HIGH = 0.05
 # Overlap threshold used for non-maximum suppression (suppress boxes with
 # IoU >= this threshold)
 _C.MODEL.ROI_HEADS.NMS = 0.5 #intra-class
