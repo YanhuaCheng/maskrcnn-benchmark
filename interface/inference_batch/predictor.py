@@ -52,21 +52,21 @@ class COCODemo(object):
                 the BoxList via `prediction.fields()`
         """
         if topn is not None:
-           self.topn = topn
+            self.topn = topn
 
         img_h = img_h.item()
         img_w = img_w.item()
         top_predictions = self.compute_prediction(img, img_h, img_w)
 
         if self.visualize_flag:
-           save_dir = os.path.join(self.cfg.OUTPUT_DIR, os.path.split(self.cfg.MODEL.WEIGHT)[1])
-           if not os.path.isdir(save_dir):
-               os.makedirs(save_dir)
-           img_result = self.unnormalize(img)
-           img_result = cv2.resize(img_result.numpy(), (img_w, img_h))
-           img_result = self.overlay_boxes(np.asarray(img_result, np.uint8), top_predictions)
-           cv2.imwrite("{}/{}.jpg".format(save_dir, img_name.replace('/', '_')), img_result)
-           print('{}/{}.jpg'.format(save_dir, img_name.replace('/', '_')))
+            save_dir = os.path.join(self.cfg.OUTPUT_DIR, os.path.split(self.cfg.MODEL.WEIGHT)[1])
+            if not os.path.isdir(save_dir):
+                os.makedirs(save_dir)
+            img_result = self.unnormalize(img)
+            img_result = cv2.resize(img_result.numpy(), (img_w, img_h))
+            img_result = self.overlay_boxes(np.asarray(img_result, np.uint8), top_predictions)
+            cv2.imwrite("{}/{}.jpg".format(save_dir, img_name.replace('/', '_')), img_result)
+            print('{}/{}.jpg'.format(save_dir, img_name.replace('/', '_')))
         return top_predictions
 
     def compute_prediction(self, img, img_h, img_w):
@@ -108,7 +108,7 @@ class COCODemo(object):
             x1, y1, x3, y3 = box[:4].tolist()
             if (y3 - y1 > self.min_bbox_h * img_h) and (x3 - x1 > self.min_bbox_w * img_w) and ((x3 - x1) * (y3 - y1) > self.min_bbox_area * img_h * img_w):
                 weighted_score = self.score_weight * score.item() + self.pos_weight * math.exp(-5*(math.pow(0.5*(x1+x3)/img_w-0.5, 2)+math.pow(0.5*(y1+y3)/img_h-0.5, 2))) + self.area_weight * (x3 - x1) * (y3 - y1) / (img_h * img_w)
-                #print('weihted_score={}={}*{}(score)+{}*{}(position)+{}*{}(area)'.format(weighted_score, self.score_weight, score.item(), self.pos_weight, math.exp(-5*(math.pow(0.5*(x1+x3)/img_w-0.5, 2)+math.pow(0.5*(y1+y3)/img_h-0.5, 2))), self.area_weight, (x3 - x1) * (y3 - y1) / (img_h * img_w * 1.0)))
+                # print('weihted_score={}={}*{}(score)+{}*{}(position)+{}*{}(area)'.format(weighted_score, self.score_weight, score.item(), self.pos_weight, math.exp(-5*(math.pow(0.5*(x1+x3)/img_w-0.5, 2)+math.pow(0.5*(y1+y3)/img_h-0.5, 2))), self.area_weight, (x3 - x1) * (y3 - y1) / (img_h * img_w * 1.0)))
             else:
                 weighted_score = 0.0
             weighted_scores.append(weighted_score)
@@ -119,7 +119,7 @@ class COCODemo(object):
                 continue
             top_prediction = dict()
             scores_all = prediction[[rank_idx]].get_field("scores_all")
-            scores_all[:, -1] = max(scores_all[:, -1], self.score_thresh_high) #other category
+            scores_all[:, -1] = max(scores_all[:, -1], self.score_thresh_high) # other category
             boxes = prediction[[rank_idx]].bbox
             box = boxes[0].to(torch.int64)
             top_prediction['bbox'] = box[:4].tolist()
@@ -130,7 +130,7 @@ class COCODemo(object):
             top_prediction['category'] = [self.CATEGORIES[label+1] for label in labels]
             top_prediction['score'] = [score.item() for score in scores]
             top_predictions.append(top_prediction)
-        if len(top_predictions) == 0 and self.data_source == 0: #use whole image if no bbox
+        if len(top_predictions) == 0 and self.data_source == 0:  # use whole image if no bbox
             top_prediction = dict()
             top_prediction['bbox'] = [0, 0, img_w-1, img_h-1]
             top_prediction['category'] = [self.CATEGORIES[-1]]
