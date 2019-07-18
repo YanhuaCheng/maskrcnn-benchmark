@@ -1,6 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import torch
 from maskrcnn_benchmark.layers import smooth_l1_loss
+from maskrcnn_benchmark.layers import SigmoidFocalLoss
 from maskrcnn_benchmark.modeling.balanced_positive_negative_sampler import \
     BalancedPositiveNegativeSampler
 from maskrcnn_benchmark.modeling.box_coder import BoxCoder
@@ -23,7 +24,9 @@ class FastRCNNLossComputation(object):
         box_coder,
         class_weights,
         class_compete,
-        cls_agnostic_bbox_reg=False
+        cls_agnostic_bbox_reg=False,
+        use_focal_loss=False,
+        sigmoid_focal_loss=None
     ):
         """
         Arguments:
@@ -37,6 +40,8 @@ class FastRCNNLossComputation(object):
         self.cls_agnostic_bbox_reg = cls_agnostic_bbox_reg
         self.class_weights = class_weights
         self.class_compete = class_compete
+        self.use_focal_loss = use_focal_loss
+        self.sigmoid_focal_loss = sigmoid_focal_loss
 
     def match_targets_to_proposals(self, proposal, target):
         match_quality_matrix = boxlist_iou(target, proposal)
@@ -145,7 +150,10 @@ class FastRCNNLossComputation(object):
             [proposal.get_field("regression_targets") for proposal in proposals], dim=0
         )
         if self.class_compete:
-           classification_loss = F.cross_entropy(class_logits, labels, weight=torch.tensor(self.class_weights, device=device))
+           if not self.use_focal_loss:
+              classification_loss = F.cross_entropy(class_logits, labels, weight=torch.tensor(self.class_weights, device=device))
+           else:
+              classification_loss = self.sigmoid_focal_loss(class_logits, labels) / (labels.numel())
         else:
            onehot_labels = torch.zeros_like(class_logits)
            onehot_labels.scatter_(1, torch.unsqueeze(labels, 1), 1.0)
@@ -192,6 +200,11 @@ def make_roi_box_loss_evaluator(cfg):
     )
 
     cls_agnostic_bbox_reg = cfg.MODEL.CLS_AGNOSTIC_BBOX_REG
+    use_focal_loss = cfg.MODEL.ROI_BOX_HEAD.USE_FOCAL_LOSS
+    sigmoid_focal_loss = SigmoidFocalLoss(
+        cfg.MODEL.RETINANET.LOSS_GAMMA,
+        cfg.MODEL.RETINANET.LOSS_ALPHA
+    )
 
     loss_evaluator = FastRCNNLossComputation(
         matcher,
@@ -199,7 +212,9 @@ def make_roi_box_loss_evaluator(cfg):
         box_coder,
         class_weights,
         class_compete,
-        cls_agnostic_bbox_reg
+        cls_agnostic_bbox_reg,
+        use_focal_loss,
+        sigmoid_focal_loss
     )
 
     return loss_evaluator
