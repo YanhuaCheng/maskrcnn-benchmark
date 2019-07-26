@@ -23,7 +23,7 @@ if __name__ == "__main__":
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
     cfg.freeze()
-    #assert(cfg.TEST.IMS_PER_BATCH == 1)
+    # assert(cfg.TEST.IMS_PER_BATCH == 1)
     img_list = []
     if not args.root_dir.endswith('/'):
         args.root_dir += '/'
