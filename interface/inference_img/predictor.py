@@ -58,7 +58,7 @@ class COCODemo(object):
         # img_w = img_w.item()
         top_predictions = self.compute_prediction(img, img_h, img_w)
 
-        if self.visualize_flag:
+        if self.visualize_flag and len(top_predictions) > 0:
             save_dir = os.path.join(self.cfg.OUTPUT_DIR, os.path.split(self.cfg.MODEL.WEIGHT)[1])
             if not os.path.isdir(save_dir):
                 os.makedirs(save_dir)

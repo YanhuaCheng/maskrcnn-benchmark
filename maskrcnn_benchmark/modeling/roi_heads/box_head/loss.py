@@ -153,7 +153,7 @@ class FastRCNNLossComputation(object):
            if not self.use_focal_loss:
               classification_loss = F.cross_entropy(class_logits, labels, weight=torch.tensor(self.class_weights, device=device))
            else:
-              classification_loss = self.sigmoid_focal_loss(class_logits, labels) / (labels.numel())
+              classification_loss = self.sigmoid_focal_loss(class_logits, labels.int()) / (labels.numel())
         else:
            onehot_labels = torch.zeros_like(class_logits)
            onehot_labels.scatter_(1, torch.unsqueeze(labels, 1), 1.0)

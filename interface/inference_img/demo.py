@@ -36,7 +36,7 @@ if __name__ == "__main__":
     coco_demo = COCODemo(cfg)
     start_time = time.time()
     end_time = time.time()
-    for img_idx, img_name in enumerate(img_names):
+    for img_idx, img_name in enumerate(img_names[:100000]):
         print('{}/{}: img_name={}'.format(img_idx, len(img_names), img_name))
         img_ori = cv2.imread(os.path.join(args.root_dir, img_name))
         img = transformer(img_ori[:, :, ::-1])
