@@ -3,9 +3,10 @@
 Utility functions minipulating the prediction layers
 """
 
+import torch
+
 from ..utils import cat
 
-import torch
 
 def permute_and_flatten(layer, N, A, C, H, W):
     layer = layer.view(N, -1, C, H, W)
@@ -14,7 +15,7 @@ def permute_and_flatten(layer, N, A, C, H, W):
     return layer
 
 
-def concat_box_prediction_layers(box_cls, box_regression):
+def concat_box_prediction_layers(box_cls, box_regression, objectness_cls):
     box_cls_flattened = []
     box_regression_flattened = []
     # for each feature level, permute the outputs to make them be in the
@@ -42,4 +43,15 @@ def concat_box_prediction_layers(box_cls, box_regression):
     # being concatenated as well)
     box_cls = cat(box_cls_flattened, dim=1).reshape(-1, C)
     box_regression = cat(box_regression_flattened, dim=1).reshape(-1, 4)
-    return box_cls, box_regression
+
+    if objectness_cls:
+        objectness_cls_flattened = []
+        for objectness_cls_per_level in objectness_cls:
+            N, A, H, W = objectness_cls_per_level.shape
+            objectness_cls_per_level = permute_and_flatten(
+                objectness_cls_per_level, N, A, 1, H, W
+            )
+            objectness_cls_flattened.append(objectness_cls_per_level)
+        objectness_cls = cat(objectness_cls_flattened, dim=1).reshape(-1, 1)
+
+    return box_cls, box_regression, objectness_cls

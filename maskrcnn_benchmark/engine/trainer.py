@@ -68,7 +68,6 @@ def do_train(
         targets = [target.to(device) for target in targets]
 
         loss_dict = model(images, targets)
-
         losses = sum(loss for loss in loss_dict.values())
 
         # reduce losses over all GPUs for logging purposes
@@ -109,7 +108,7 @@ def do_train(
                 )
             )
         if iteration % checkpoint_period == 0:
-            checkpointer.save("model_{:07d}".format(iteration), **arguments)
+            checkpointer.save("model_latest".format(iteration), **arguments)
         if iteration == max_iter:
             checkpointer.save("model_final", **arguments)
 

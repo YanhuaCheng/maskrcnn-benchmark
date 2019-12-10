@@ -21,8 +21,8 @@ class BatchCollator(object):
         img_ids = transposed_batch[2]
         if self.transforms_batch is not None:
            images, targets = self.transforms_batch(images, targets)
-        #visual_transforms(images, targets)
-        #exit(0)
+        # visual_transforms(images, targets)
+        # exit(0)
         images = to_image_list(images, self.size_divisible)
         return images, targets, img_ids
 

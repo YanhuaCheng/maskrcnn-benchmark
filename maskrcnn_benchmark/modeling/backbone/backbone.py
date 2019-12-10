@@ -7,7 +7,8 @@ from maskrcnn_benchmark.modeling import registry
 from maskrcnn_benchmark.modeling.make_layers import conv_with_kaiming_uniform
 from . import fpn as fpn_module
 from . import resnet
-
+from maskrcnn_benchmark.modeling.backbone.efficientnet import EfficientNet
+from maskrcnn_benchmark.modeling.backbone.bifpn import BIFPN
 
 @registry.BACKBONES.register("R-50-C4")
 @registry.BACKBONES.register("R-50-C5")
@@ -67,6 +68,25 @@ def build_resnet_fpn_p3p7_backbone(cfg):
         top_blocks=fpn_module.LastLevelP6P7(in_channels_p6p7, out_channels),
     )
     model = nn.Sequential(OrderedDict([("body", body), ("fpn", fpn)]))
+    model.out_channels = out_channels
+    return model
+
+@registry.BACKBONES.register("EfficientNet-BiFPN-RETINANET")
+def build_efficientdet_backbone(cfg):
+    MODEL_MAP = {
+        'efficientdet-d0': 'efficientnet-b0',
+        'efficientdet-d1': 'efficientnet-b1',
+        'efficientdet-d2': 'efficientnet-b2',
+        'efficientdet-d3': 'efficientnet-b3',
+        'efficientdet-d4': 'efficientnet-b4',
+        'efficientdet-d5': 'efficientnet-b5',
+    } 
+    out_channels = cfg.MODEL.EFFICIENTDET.BACKBONE_OUT_CHANNELS   
+    efficientnet = EfficientNet.from_name(MODEL_MAP[cfg.MODEL.EFFICIENTDET.BACKBONE], override_params={'num_classes': 80})
+    bifpn = BIFPN(in_channels=efficientnet.get_list_features(),
+                        out_channels=out_channels,
+                        num_outs=5)
+    model = nn.Sequential(OrderedDict([("body", efficientnet), ("fpn", bifpn)]))
     model.out_channels = out_channels
     return model
 

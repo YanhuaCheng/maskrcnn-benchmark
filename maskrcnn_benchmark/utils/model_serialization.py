@@ -1,9 +1,8 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-from collections import OrderedDict
 import logging
+from collections import OrderedDict
 
 import torch
-
 from maskrcnn_benchmark.utils.imports import import_file
 
 
@@ -41,16 +40,17 @@ def align_and_update_state_dicts(model_state_dict, loaded_state_dict, ignore_cla
     max_size_loaded = max([len(key) for key in loaded_keys]) if loaded_keys else 1
     log_str_template = "{: <{}} loaded from {: <{}} of shape {}"
     logger = logging.getLogger(__name__)
+    unmatched_keys = []
     for idx_new, idx_old in enumerate(idxs.tolist()):
         if idx_old == -1:
             continue
         key = current_keys[idx_new]
         key_old = loaded_keys[idx_old]
-        if ignore_class_weight_bias:
-           if key_old.endswith(('roi_heads.box.predictor.cls_score.weight', 'roi_heads.box.predictor.cls_score.bias', 'roi_heads.box.predictor.bbox_pred.weight', 'roi_heads.box.predictor.bbox_pred.bias')):
-              logger.info('Ingore weight of {}'.format(key_old))
-              continue
-        model_state_dict[key] = loaded_state_dict[key_old]
+        if model_state_dict[key].shape == loaded_state_dict[key_old].shape:
+            model_state_dict[key] = loaded_state_dict[key_old]
+        else:
+            unmatched_keys.append("{}-->{},".format(key_old, key))
+            continue
         logger.info(
             log_str_template.format(
                 key,
@@ -60,6 +60,8 @@ def align_and_update_state_dicts(model_state_dict, loaded_state_dict, ignore_cla
                 tuple(loaded_state_dict[key_old].shape),
             )
         )
+    if len(unmatched_keys) > 0:
+        logger.info("Unmatched keys: {}".format(unmatched_keys))
 
 
 def strip_prefix_if_present(state_dict, prefix):

@@ -1,7 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 import logging
 import os
-
+import shutil
 import torch
 from maskrcnn_benchmark.utils.c2_model_loading import load_c2_format
 from maskrcnn_benchmark.utils.imports import import_file
@@ -48,6 +48,8 @@ class Checkpointer(object):
         data.update(kwargs)
 
         save_file = os.path.join(self.save_dir, "{}.pth".format(name))
+        if os.path.isfile(save_file) and save_file.endswith('latest.pth'):
+            shutil.move(save_file, save_file.replace('latest.pth', 'last.pth'))
         self.logger.info("Saving checkpoint to {}".format(save_file))
         torch.save(data, save_file)
         self.tag_last_checkpoint(save_file)

@@ -33,7 +33,7 @@ def visual_transforms_img(image, target):
             image, (int(x1), int(y1)), (int(x3), int(y3)), tuple(color), 1
         )
         cv2.putText(
-            image, 'cat_{:0<2d}'.format(label), (int(x1), int(y1+15)), cv2.FONT_HERSHEY_SIMPLEX, .6, tuple(color), 1
+            image, 'cat_{:0>2d}'.format(label), (int(x1), int(y1+15)), cv2.FONT_HERSHEY_SIMPLEX, .6, tuple(color), 1
         )
     save_path = '/data/user/data/breezecheng/pytorch_project/maskrcnn-benchmark/interface/visual/'
     if not os.path.isdir(save_path):
@@ -57,7 +57,7 @@ def visual_transforms_batch(images, targets):
                 image, (int(x1), int(y1)), (int(x3), int(y3)), tuple(color), 1
             )
             cv2.putText(
-                image, 'cat_{:0<2d}'.format(label), (int(x1), int(y1+15)), cv2.FONT_HERSHEY_SIMPLEX, .6, tuple(color), 1
+                image, 'cat_{:0>2d}'.format(label), (int(x1), int(y1+15)), cv2.FONT_HERSHEY_SIMPLEX, .6, tuple(color), 1
             )
         save_path = '/data/user/data/breezecheng/pytorch_project/maskrcnn-benchmark/interface/visual/'
         if not os.path.isdir(save_path):

@@ -81,7 +81,8 @@ def im_detect_bbox(model, images, target_scale, target_max_size, device):
     ])
     images = [transform(image) for image in images]
     images = to_image_list(images, cfg.DATALOADER.SIZE_DIVISIBILITY)
-    return model(images.to(device))
+    results = model(images.to(device))
+    return results['boxes']
 
 
 def im_detect_bbox_hflip(model, images, target_scale, target_max_size, device):
@@ -100,6 +101,7 @@ def im_detect_bbox_hflip(model, images, target_scale, target_max_size, device):
     images = [transform(image) for image in images]
     images = to_image_list(images, cfg.DATALOADER.SIZE_DIVISIBILITY)
     boxlists = model(images.to(device))
+    boxlists = boxlists['boxes']
 
     # Invert the detections computed on the flipped image
     boxlists_inv = [boxlist.transpose(0) for boxlist in boxlists]

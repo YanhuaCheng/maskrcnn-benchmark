@@ -20,14 +20,11 @@ from collections import namedtuple
 
 import torch
 import torch.nn.functional as F
-from torch import nn
-
-from maskrcnn_benchmark.layers import FrozenBatchNorm2d
-from maskrcnn_benchmark.layers import Conv2d
-from maskrcnn_benchmark.layers import DFConv2d
+from maskrcnn_benchmark.layers import (Conv2d, DFConv2d, FrozenBatchNorm2d,
+                                       FrozenBatchNorm2d_UpdateWB)
 from maskrcnn_benchmark.modeling.make_layers import group_norm
 from maskrcnn_benchmark.utils.registry import Registry
-
+from torch import nn
 
 # ResNet stage specification
 StageSpec = namedtuple(
@@ -390,6 +387,30 @@ class BottleneckWithFixedBatchNorm(Bottleneck):
             dcn_config=dcn_config
         )
 
+class BottleneckWithFixedBatchNorm_UpdateWB(Bottleneck):
+    def __init__(
+        self,
+        in_channels,
+        bottleneck_channels,
+        out_channels,
+        num_groups=1,
+        stride_in_1x1=True,
+        stride=1,
+        dilation=1,
+        dcn_config={}
+    ):
+        super(BottleneckWithFixedBatchNorm_UpdateWB, self).__init__(
+            in_channels=in_channels,
+            bottleneck_channels=bottleneck_channels,
+            out_channels=out_channels,
+            num_groups=num_groups,
+            stride_in_1x1=stride_in_1x1,
+            stride=stride,
+            dilation=dilation,
+            norm_func=FrozenBatchNorm2d_UpdateWB,
+            dcn_config=dcn_config
+        )
+
 
 class StemWithFixedBatchNorm(BaseStem):
     def __init__(self, cfg):
@@ -397,6 +418,11 @@ class StemWithFixedBatchNorm(BaseStem):
             cfg, norm_func=FrozenBatchNorm2d
         )
 
+class StemWithFixedBatchNorm_UpdateWB(BaseStem):
+    def __init__(self, cfg):
+        super(StemWithFixedBatchNorm_UpdateWB, self).__init__(
+            cfg, norm_func=FrozenBatchNorm2d_UpdateWB
+        )
 
 class BottleneckWithGN(Bottleneck):
     def __init__(
@@ -430,11 +456,13 @@ class StemWithGN(BaseStem):
 
 _TRANSFORMATION_MODULES = Registry({
     "BottleneckWithFixedBatchNorm": BottleneckWithFixedBatchNorm,
+    "BottleneckWithFixedBatchNorm_UpdateWB": BottleneckWithFixedBatchNorm_UpdateWB,
     "BottleneckWithGN": BottleneckWithGN,
 })
 
 _STEM_MODULES = Registry({
     "StemWithFixedBatchNorm": StemWithFixedBatchNorm,
+    "StemWithFixedBatchNorm_UpdateWB": StemWithFixedBatchNorm_UpdateWB,
     "StemWithGN": StemWithGN,
 })
 

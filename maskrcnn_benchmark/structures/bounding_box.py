@@ -205,6 +205,25 @@ class BoxList(object):
             bbox.add_field(k, v)
         return bbox.convert(self.mode)
 
+    def valid_area(self, union_flag=True):
+        """
+        Crops a rectangular region from this bounding box. The box is a
+        4-tuple defining the left, upper, right, and lower pixel
+        coordinate. The box must include all objects inside.
+        """
+        TO_REMOVE = 1
+        xmin, ymin, xmax, ymax = self._split_into_xyxy()
+        if union_flag:
+            valid_area = [xmin.min().clamp(min=0, max=self.size[0]-TO_REMOVE),
+                          ymin.min().clamp(min=0, max=self.size[1]-TO_REMOVE),
+                          xmax.max().clamp(min=0, max=self.size[0]-TO_REMOVE),
+                          ymax.max().clamp(min=0, max=self.size[1]-TO_REMOVE)]
+            valid_area = list(map(lambda x: int(x.item()), valid_area))
+        else:
+            bbox_idx = random.randint(0, len(self)-1)
+            valid_area = [int(xmin[bbox_idx].item()), int(ymin[bbox_idx].item()), int(xmax[bbox_idx].item()), int(ymax[bbox_idx].item())]
+        return valid_area, self.size
+
     def valid_area_crop(self):
         """
         Crops a rectangular region from this bounding box. The box is a
@@ -217,8 +236,8 @@ class BoxList(object):
                       ymin.min().clamp(min=0, max=self.size[1]-TO_REMOVE),
                       xmax.max().clamp(min=0, max=self.size[0]-TO_REMOVE),
                       ymax.max().clamp(min=0, max=self.size[1]-TO_REMOVE)]
-        box = [random.randint(0, valid_area[0]), random.randint(0, valid_area[1]),
-                random.randint(valid_area[2], self.size[0]-TO_REMOVE), random.randint(valid_area[3], self.size[1]-TO_REMOVE)]
+        box = [random.randint(0, int(valid_area[0])), random.randint(0, int(valid_area[1])),
+                random.randint(int(valid_area[2]), self.size[0]-TO_REMOVE), random.randint(int(valid_area[3]), self.size[1]-TO_REMOVE)]
 
         w, h = box[2] - box[0], box[3] - box[1]
         cropped_xmin = (xmin - box[0]).clamp(min=0, max=w)

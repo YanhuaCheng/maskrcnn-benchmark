@@ -2,10 +2,10 @@
 import math
 
 import numpy as np
-import torch
-from torch import nn
 
+import torch
 from maskrcnn_benchmark.structures.bounding_box import BoxList
+from torch import nn
 
 
 class BufferList(nn.Module):
@@ -241,7 +241,6 @@ def _generate_anchors(base_size, scales, aspect_ratios):
         [_scale_enum(anchors[i, :], scales) for i in range(anchors.shape[0])]
     )
     return torch.from_numpy(anchors)
-
 
 def _whctrs(anchor):
     """Return width, height, x center, and y center for an anchor (window)."""

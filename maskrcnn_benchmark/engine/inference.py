@@ -28,6 +28,7 @@ def compute_on_dataset(model, data_loader, device, timer=None):
                 output = im_detect_bbox_aug(model, images, device)
             else:
                 output = model(images.to(device))
+                output = output['boxes']
             if timer:
                 if not cfg.MODEL.DEVICE == 'cpu':
                     torch.cuda.synchronize()
@@ -71,6 +72,7 @@ def inference(
         expected_results=(),
         expected_results_sigma_tol=4,
         output_folder=None,
+        use_cat_label=True,
 ):
     # convert to a torch.device for efficiency
     device = torch.device(device)
@@ -112,6 +114,7 @@ def inference(
         iou_types=iou_types,
         expected_results=expected_results,
         expected_results_sigma_tol=expected_results_sigma_tol,
+        use_cat_label=use_cat_label,
     )
 
     return evaluate(dataset=dataset,

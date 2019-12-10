@@ -51,13 +51,17 @@ _C.MODEL.CLS_AGNOSTIC_BBOX_REG = False
 # path
 _C.MODEL.WEIGHT = ""
 # Adapt to different number of categories
-_C.MODEL.IGNORE_CLASS_WEIGHT_BIAS = False
+_C.MODEL.IGNORE_CLASS_WEIGHT_BIAS = False  # now is usefuless
 _C.MODEL.RESUME_CONTINUE = False
+_C.MODEL.CLASSIFY_HOLISTIC_IMAGE = False
+_C.MODEL.CLASSIFY_OBJECTNESS_IMAGE = False
 
 # -----------------------------------------------------------------------------
 # INPUT
 # -----------------------------------------------------------------------------
 _C.INPUT = CN()
+# Whether to keep aspect ratio for image resizing
+_C.INPUT.KEEP_ASPECT_RATIO = True
 # Size of the smallest side of the image during training
 _C.INPUT.MIN_SIZE_TRAIN = (800,)  # (800,)
 # Maximum size of the side of the image during training
@@ -82,6 +86,10 @@ _C.INPUT.CROP_PROB_TRAIN = 0.5
 _C.INPUT.BLUR_PROB_TRAIN = 0.5
 _C.INPUT.CONTRAST_PROB_TRAIN = 0.5
 _C.INPUT.HSV_PROB_TRAIN = 0.5
+_C.INPUT.MIXUP_PROB_TRAIN = 0.5
+_C.INPUT.MIXUP_ALPHA = (0.05, 0.15)
+_C.INPUT.AUG_BNDOBJ_PROB_TRAIN = 0.5
+_C.INPUT.AUG_BNDOBJ_RATIO = (0.0, 0.3)
 
 # -----------------------------------------------------------------------------
 # Dataset
@@ -316,14 +324,31 @@ _C.MODEL.RESNETS.STAGE_WITH_DCN = (False, False, False, False)
 _C.MODEL.RESNETS.WITH_MODULATED_DCN = False
 _C.MODEL.RESNETS.DEFORMABLE_GROUPS = 1
 
+# ---------------------------------------------------------------------------- #
+# EfficientDet options
+# ---------------------------------------------------------------------------- #
+_C.MODEL.EFFICIENTDET = CN()
+# efficientdet-d0~d7
+_C.MODEL.EFFICIENTDET.BACKBONE = 'efficientdet-d2'
+_C.MODEL.EFFICIENTDET.BACKBONE_OUT_CHANNELS = 256
 
 # ---------------------------------------------------------------------------- #
 # RetinaNet Options (Follow the Detectron version)
 # ---------------------------------------------------------------------------- #
 _C.MODEL.RETINANET = CN()
 
-# This is the number of foreground classes and background.
+# This is the number of foreground classes and background for detection stream.
 _C.MODEL.RETINANET.NUM_CLASSES = 81
+# This is the number of foreground classes and background and noise for holistic classification stream.
+_C.MODEL.RETINANET.NUM_HOLISTIC_CLASSES = 81
+_C.MODEL.RETINANET.HOLISTIC_CLASS_WEIGHT = (1.0, )  # pos_weight>=1 for binary_cross_entropy_loss
+_C.MODEL.RETINANET.HOLISTIC_LOSS_WEIGHT = 1.0  # loss weight 1.0/HOLISTIC_LOSS_WEIGHT
+_C.MODEL.RETINANET.HOLISTIC_USE_FOCAL_LOSS = False # whether to use focal loss for holistic image classification
+_C.MODEL.RETINANET.HOLISTIC_ALPHA = 0.25
+_C.MODEL.RETINANET.HOLISTIC_GAMMA = 2.0
+
+# This is the parameter for predict objectness score.
+_C.MODEL.RETINANET.OBJECTNESS_LOSS_WEIGHT = 1.0  # loss weight 1.0/OBJECTNESS_LOSS_WEIGHT
 
 # Anchor aspect ratios to use
 _C.MODEL.RETINANET.ANCHOR_SIZES = (32, 64, 128, 256, 512)
@@ -360,9 +385,10 @@ _C.MODEL.RETINANET.FG_IOU_THRESHOLD = 0.5
 # Anchors with < iou overlap are labeled negative
 _C.MODEL.RETINANET.BG_IOU_THRESHOLD = 0.4
 
+# Focal loss parameter: use ignored bbox
+_C.MODEL.RETINANET.LOSS_USE_IGNORE = True
 # Focal loss parameter: alpha
 _C.MODEL.RETINANET.LOSS_ALPHA = 0.25
-
 # Focal loss parameter: gamma
 _C.MODEL.RETINANET.LOSS_GAMMA = 2.0
 
@@ -483,6 +509,8 @@ _C.TEST.BBOX_AUG.MAX_SIZE = 4000
 # Horizontal flip at each scale
 _C.TEST.BBOX_AUG.SCALE_H_FLIP = False
 
+# evaluation use cat_label or not (foreground/background)
+_C.TEST.USE_CAT_LABEL = True
 
 # ---------------------------------------------------------------------------- #
 # Misc options
