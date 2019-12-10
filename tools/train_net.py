@@ -27,6 +27,7 @@ from maskrcnn_benchmark.utils.miscellaneous import mkdir, save_config
 # See if we can use apex.DistributedDataParallel instead of the torch default,
 # and enable mixed-precision via apex.amp
 try:
+    import apex
     from apex import amp
 except ImportError:
     raise ImportError('Use APEX for multi-precision via apex.amp')
@@ -46,11 +47,12 @@ def train(cfg, local_rank, distributed):
     model, optimizer = amp.initialize(model, optimizer, opt_level=amp_opt_level)
 
     if distributed:
-        model = torch.nn.parallel.DistributedDataParallel(
-            model, device_ids=[local_rank], output_device=local_rank,
-            # this should be removed if we update BatchNorm stats
-            broadcast_buffers=False,
-        )
+        # model = torch.nn.parallel.DistributedDataParallel(
+        #     model, device_ids=[local_rank], output_device=local_rank,
+        #     # this should be removed if we update BatchNorm stats
+        #     broadcast_buffers=False,
+        # )
+        model = apex.parallel.DistributedDataParallel(model, delay_allreduce=True)
 
     arguments = {}
     arguments["iteration"] = 0
